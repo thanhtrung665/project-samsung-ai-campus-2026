@@ -1,0 +1,69 @@
+{
+  "split_sizes": {
+    "train": 5084,
+    "val": 565,
+    "test_synth": 562,
+    "dropped_leak": 144
+  },
+  "groups": 2067,
+  "group_overlap_train_test": 0,
+  "intent_by_split": {
+    "dropped_leak": {
+      "allergy_diet": 18,
+      "complaint": 0,
+      "menu_info": 94,
+      "policy_promo": 6,
+      "price_query": 9,
+      "recommendation": 16,
+      "reservation_create": 0,
+      "store_info": 1
+    },
+    "test_synth": {
+      "allergy_diet": 71,
+      "complaint": 3,
+      "menu_info": 277,
+      "policy_promo": 23,
+      "price_query": 91,
+      "recommendation": 83,
+      "reservation_create": 3,
+      "store_info": 11
+    },
+    "train": {
+      "allergy_diet": 634,
+      "complaint": 18,
+      "menu_info": 2627,
+      "policy_promo": 179,
+      "price_query": 760,
+      "recommendation": 744,
+      "reservation_create": 30,
+      "store_info": 92
+    },
+    "val": {
+      "allergy_diet": 69,
+      "complaint": 3,
+      "menu_info": 288,
+      "policy_promo": 16,
+      "price_query": 88,
+      "recommendation": 86,
+      "reservation_create": 3,
+      "store_info": 12
+    }
+  },
+  "noisy_input_rate": 0.6884343036978757,
+  "unaccented_rate": 0.43981117230527145,
+  "leakage": {
+    "val": {
+      "n": 634,
+      "cos_mean": 0.7797071775151563,
+      "cos_p95": 0.9560770342716908,
+      "n_over_threshold": 69
+    },
+    "test_synth": {
+      "n": 637,
+      "cos_mean": 0.788305819743973,
+      "cos_p95": 1.0,
+      "n_over_threshold": 75
+    },
+    "dropped_leak": 144
+  }
+}

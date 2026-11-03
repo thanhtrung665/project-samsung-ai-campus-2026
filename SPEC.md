@@ -46,6 +46,8 @@ chính sách theo tiêu đề 300–500 token, overlap 50; FAQ 1 cặp = 1 chunk
 | Mẫu SFT (`messages` + `meta`) | chuyển đổi 6.355 mẫu + bổ sung RAFT (context + nhiễu, 20% chỉ nhiễu → từ chối), tool-call, out_of_scope | Fine-tune |
 | `test_gold` (~150) / `test_adv` (~80) / 30–60 kịch bản nhiều lượt | **viết tay**, đóng băng SHA-256 | Đánh giá chính |
 
+Kết quả trích KB (03/11): 106 món chính tắc, 74 có giá, 32 thiếu giá (Combo 10, Sashimi 9), 1 xung đột giá (Khoai tây chiên 53.900/49.000); dị ứng suy luận bằng từ khóa (`allergen_verified=0`). Intent thực tế trong dữ liệu cũ: menu_info 52%, price 15%, recommendation 15%, allergy 12%, policy 4%, store 2%, reservation 1%, complaint <1%; thiếu hẳn reservation_manage, order_status, chitchat, out_of_scope → phải bổ sung.
+
 Taxonomy 12 intent: `menu_info, price_query, allergy_diet, recommendation, store_info, reservation_create, reservation_manage,
 order_status, policy_promo, complaint, chitchat, out_of_scope`. Ánh xạ `Domain` → intent bằng luật từ khóa + duyệt tay.
 
@@ -98,14 +100,14 @@ Trạng thái: ✅ xong · 🟡 đang làm / một phần · ⬜ chưa làm. **�
 |---|---|---|---|---|---|
 | T00 | 28/10 | Kế hoạch 12 ngày, khung `.qmd` + trang bìa | P0 | `docs/Ke-hoach…docx`, YAML/titlepage | ✅ |
 | T01 | – | Phần 1 báo cáo (pain, 3 persona, empathy map, RQ, SMART, ROI + độ nhạy) | P0 | §1 trong `.qmd` | ✅ |
-| T02 | – | Phần 2 báo cáo (CRISP-DM, Transformer, Qwen/LLaMA, LoRA/QLoRA, Hybrid RAG, Agent, so sánh hướng tiếp cận) | P0 | §2 trong `.qmd` | ✅ (thiếu 2 hình) |
+| T02 | – | Phần 2 báo cáo (CRISP-DM, Transformer, Qwen/LLaMA, LoRA/QLoRA, Hybrid RAG, Agent, so sánh hướng tiếp cận) | P0 | §2 trong `.qmd` | ✅ (đã có hình kiến trúc; còn thiếu logo) |
 | T03 | – | Thu thập dữ liệu hội thoại (6.355 mẫu) | P0 | `data/*.json` | ✅ |
-| T04 | 03/11 | Dựng repo: `code/`, `results/`, `images/`, `requirements.txt`, `.gitignore`, `.env.example`; render thử PDF | P0 | PDF render được | ⬜ |
-| T05 | 03/11 | Trích KB: menu/giá/dị ứng → `kb/menu.csv`, `kimochi.db` (SQLite schema + seed), policies/FAQ; data dictionary | P0 | `01_build_kb.ipynb` chạy; bảng data dictionary | ⬜ |
-| T06 | 03–04/11 | Viết tay & đóng băng `test_gold` (150) + `test_adv` (80) + 30 kịch bản đặt bàn; SHA-256 | P0 | `data/splits/CHECKSUMS.txt` | ⬜ |
-| T07 | 04/11 | Chuyển đổi 6.355 mẫu → `messages`+`meta`, gán intent, bổ sung RAFT/tool-call/từ chối (LLM thầy), lọc, split theo group | P0 | `02_prepare_sft.ipynb`, train/val/test_synth.jsonl, phễu lọc | ⬜ |
-| T08 | 04–05/11 | EDA 6–8 biểu đồ + nhận xét kinh doanh; viết **Phần 3** | P0 | `03_eda.ipynb`, §3 `.qmd` | ⬜ |
-| T09 | 05/11 | Hybrid RAG + ablation R1–R5 (Recall@5, MRR, nDCG@5) | P0 | `04_rag.ipynb`, `results/retrieval.csv` | ⬜ |
+| T04 | 03/11 | Dựng repo: `code/`, `results/`, `images/`, `requirements.txt`, `.gitignore`, `.env.example`; render thử PDF | P0 | PDF render được | ✅ 03/11 |
+| T05 | 03/11 | Trích KB: menu/giá/dị ứng → `kb/menu.csv`, `kimochi.db` (SQLite schema + seed), policies/FAQ; data dictionary | P0 | `01_build_kb.ipynb` chạy; bảng data dictionary | ✅ 03/11 (106 món, 74 có giá) |
+| T06 | 03–04/11 | Viết tay & đóng băng `test_gold` (150) + `test_adv` (80) + 30 kịch bản đặt bàn; SHA-256 | P0 | `data/splits/CHECKSUMS.txt` | 🟡 công cụ `code/freeze_tests.py` xong — **nhóm phải tự viết** |
+| T07 | 04/11 | Chuyển đổi 6.355 mẫu → `messages`+`meta`, gán intent, bổ sung RAFT/tool-call/từ chối (LLM thầy), lọc, split theo group | P0 | `02_prepare_sft.ipynb`, train/val/test_synth.jsonl, phễu lọc | 🟡 chuyển đổi + split xong (5.084/565/562); còn RAFT/tool-call/từ chối |
+| T08 | 04–05/11 | EDA 6–8 biểu đồ + nhận xét kinh doanh; viết **Phần 3** | P0 | `03_eda.ipynb`, §3 `.qmd` | ✅ 03/11 (7 hình; token-length chạy trên Colab) |
+| T09 | 05/11 | Hybrid RAG + ablation R1–R5 (Recall@5, MRR, nDCG@5) | P0 | `04_rag.ipynb`, `results/retrieval_test_synth.csv` | 🟡 sparse xong (BM25+lọc R@5 0,951); dense/reranker chạy trên Colab |
 | T10 | 05/11 | Baseline B0/B1/B2 cả 2 model trên test_gold | P0 | `results/baseline.csv` | ⬜ |
 | T11 | 05–06/11 | Optuna 8 trial Qwen QLoRA; train M1–M4 (1 seed bắt buộc, 3 seed nếu kịp); learning curve | P0 | 4 adapter trên HF Hub, `results/train.csv`, hình loss | ⬜ |
 | T12 | 07/11 | Agent (sql/rag/handoff) gắn M*; chạy kịch bản; confusion matrix công cụ; viết **Phần 4** | P0 | `06_agent.ipynb`, §4 `.qmd` | ⬜ |

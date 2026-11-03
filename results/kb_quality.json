@@ -1,0 +1,27 @@
+{
+  "raw_rows": 6355,
+  "rows_mapped_to_item": 4108,
+  "rows_policy_general": 2247,
+  "menu_items": 106,
+  "items_with_price": 74,
+  "items_price_conflict": 1,
+  "price_conflicts": {
+    "Khoai Tây Chiên": {
+      "53900": 1,
+      "49000": 1
+    }
+  },
+  "docs_menu": 106,
+  "docs_policy": 545,
+  "category_counts": {
+    "Món nóng / Khai vị": 21,
+    "Đồ uống": 16,
+    "Combo": 15,
+    "Maki / Cơm cuộn": 14,
+    "Salad": 13,
+    "Cơm / Mì": 12,
+    "Sashimi": 9,
+    "Tráng miệng": 4,
+    "Súp": 2
+  }
+}

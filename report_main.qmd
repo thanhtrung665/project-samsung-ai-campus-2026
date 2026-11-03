@@ -445,6 +445,64 @@ Hướng tiếp cận kết hợp có chi phí triển khai cao nhất, nhưng l
 
 Theo kiến trúc này, khách hàng tương tác với chatbot qua giao diện web. Agent sử dụng mô hình ngôn ngữ đã được tinh chỉnh tốt nhất để phân tích câu hỏi và lựa chọn một trong ba nhóm công cụ: truy vấn cơ sở dữ liệu SQL cho thông tin giao dịch, truy xuất Hybrid RAG trên kho NoSQL cho thông tin mô tả, hoặc chuyển giao cho nhân viên đối với khiếu nại và các trường hợp có độ tin cậy thấp. Khối huấn luyện ngoại tuyến thực hiện so sánh bốn cấu hình {Qwen2.5, LLaMA 3.2} × {LoRA, QLoRA} và chọn ra adapter tốt nhất để nạp vào Agent.
 
+
+# Khám phá và tiền xử lý dữ liệu
+
+*Phần này áp dụng giai đoạn Hiểu dữ liệu và Chuẩn bị dữ liệu của CRISP-DM. Toàn bộ số liệu được sinh tự động bởi các notebook `code/01_build_kb.ipynb`, `code/02_prepare_sft.ipynb` và `code/03_eda.ipynb`.*
+
+## Từ điển dữ liệu
+
+Nghiên cứu sử dụng ba nguồn dữ liệu có vai trò tách biệt: **(1)** bộ hội thoại hỏi – đáp kế thừa từ phiên bản trước \[2\], dùng để tinh chỉnh và đánh giá; **(2)** cơ sở dữ liệu quan hệ (SQLite) chứa dữ kiện có cấu trúc như giá món, chi nhánh, bàn và lượt đặt bàn, phục vụ công cụ truy vấn SQL của Agent; **(3)** kho tài liệu phi cấu trúc (mô tả món, chính sách, gợi ý theo dịp) phục vụ Hybrid RAG. Nguồn (2) và (3) được **trích xuất tự động từ nguồn (1)** bằng luật, nên mọi dữ kiện đều có căn cứ trong dữ liệu gốc của nhà hàng; riêng bảng bàn và đặt bàn là dữ liệu **mô phỏng** (đánh dấu `simulated = 1`) do nhà hàng chưa cung cấp số liệu này.
+
+| Thuộc tính | Kiểu | Ý nghĩa nghiệp vụ |
+|:-------------|:--------:|:------------------------------------------------|
+| `Domain` | Văn bản | Chủ đề câu hỏi, thường dạng "Khía cạnh: Tên món" (1.902 giá trị khác nhau) |
+| `user_query` | Văn bản | Câu hỏi của khách, mô phỏng văn phong nhắn tin fanpage |
+| `responses` | Văn bản | Câu trả lời chuẩn theo giọng điệu CSKH của Kimochi |
+| `intent` *(tạo mới)* | Phân loại | Ý định của khách, 8 nhóm có trong dữ liệu |
+| `group_id` *(tạo mới)* | Định danh | Mã băm câu trả lời chuẩn hóa – gom các câu hỏi diễn đạt lại |
+| `noisy_input` *(tạo mới)* | Nhị phân | Câu hỏi không dấu, viết tắt hoặc teen code |
+| `needs_tool` *(tạo mới)* | Phân loại | Công cụ cần gọi: `sql`, `rag` hoặc `handoff` |
+| `difficulty` *(tạo mới)* | Thứ bậc | Độ khó theo độ dài và loại ý định |
+
+: Từ điển dữ liệu của bộ hội thoại (6.355 dòng, 3 thuộc tính gốc + 5 thuộc tính tạo mới) {#tbl-dict}
+
+Cơ sở dữ liệu `kimochi.db` gồm sáu bảng: `categories` (9 danh mục), `menu_items` (106 món, trong đó 74 món có giá), `branches` (2 chi nhánh với hotline và giờ mở cửa 11h00–22h00), `tables` (24 bàn mô phỏng), `reservations` và `promotions`. Kho tài liệu RAG gồm 106 tài liệu món ăn (mỗi món một tài liệu, kèm metadata danh mục, nhóm dị ứng, mức cay) và các tài liệu chủ đề chung (chính sách, gợi ý theo dịp, thông tin chi nhánh).
+
+## Phân tích khám phá dữ liệu và phát hiện kinh doanh
+
+**Phân phối biến mục tiêu (intent).** @fig-intent cho thấy dữ liệu **lệch mạnh**: hỏi thông tin món chiếm 52%, hỏi giá 15%, gợi ý món 15%, dị ứng – chế độ ăn 12%, trong khi đặt bàn chỉ 1% và khiếu nại dưới 0,5%; các ý định quản lý đặt bàn, tra cứu đơn và câu hỏi ngoài phạm vi hoàn toàn vắng mặt. Về mặt kinh doanh, bộ dữ liệu cũ được xây dựng để *giới thiệu thực đơn*, chưa bao phủ các tác vụ *giao dịch* mang lại doanh thu trực tiếp. Đây là căn cứ để bổ sung mẫu đặt bàn, mẫu gọi công cụ và mẫu từ chối ở bước tăng cường dữ liệu, đồng thời giải thích tỷ lệ fallback cao (25,7%) của phiên bản trước.
+
+![Phân phối intent toàn bộ dữ liệu và tỷ trọng intent trong từng tập sau khi chia](images/eda_intent_split.png){#fig-intent width=100%}
+
+**Độ dài câu hỏi và câu trả lời.** Theo @fig-lengths, câu hỏi trung bình 9,5 từ (phân vị 95 là 16 từ), câu trả lời trung bình 38,8 từ (tối đa 122 từ); cả hai phân phối **lệch phải** (skewness lần lượt 2,12 và 1,26). Khách hàng nhắn ngắn, còn câu trả lời đủ ngắn để đọc trên điện thoại. Về kỹ thuật, một mẫu hội thoại đơn lượt chưa kèm ngữ cảnh truy xuất chỉ chiếm vài trăm token, nên giới hạn `max_seq_length` chủ yếu phụ thuộc lượng ngữ cảnh RAG đưa vào; giá trị 1.024–2.048 token là đủ và giúp tiết kiệm bộ nhớ GPU.
+
+![Phân phối độ dài câu hỏi và câu trả lời (đường đứt là trung vị)](images/eda_lengths.png){#fig-lengths width=100%}
+
+**Mức độ "bẩn" của ngôn ngữ.** @fig-noise cho thấy 68,8% câu hỏi có ít nhất một dấu hiệu nhiễu và **44% hoàn toàn không dấu** (ví dụ "com cuon kieu cali co phai mon hot khong"). Đây là đặc trưng của kênh nhắn tin fanpage: tìm kiếm thuần từ khóa trên văn bản có dấu sẽ bỏ lỡ gần một nửa câu hỏi. Vì vậy toàn bộ bước truy xuất BM25 và so khớp tên món được thực hiện trên văn bản **đã bỏ dấu**, và mô hình được đánh giá riêng trên nhóm câu không dấu.
+
+![Tỷ lệ câu hỏi có nhiễu và câu hỏi hoàn toàn không dấu theo intent](images/eda_noise.png){#fig-noise width=85%}
+
+**Cấu trúc diễn đạt lại và nguy cơ rò rỉ dữ liệu.** Bộ dữ liệu có 6.069 câu hỏi khác nhau nhưng chỉ **2.067 câu trả lời khác nhau**; 99,3% câu trả lời được dùng chung cho từ ba câu hỏi diễn đạt lại trở lên (@fig-group). Nếu chia ngẫu nhiên theo dòng, cùng một đáp án sẽ xuất hiện ở cả tập huấn luyện và tập kiểm tra, khiến điểm đánh giá bị thổi phồng. Đây là phát hiện quan trọng nhất của bước EDA và quyết định toàn bộ cách chia dữ liệu ở mục sau.
+
+![Phân phối số câu hỏi dùng chung một câu trả lời](images/eda_group_size.png){#fig-group width=70%}
+
+**Thực đơn, giá và rủi ro dị ứng.** @fig-menu (trái) cho thấy giá trung vị 84.000 đồng; Combo là nhóm giá cao nhất (khoảng 200–233 nghìn đồng), đồ uống và tráng miệng dưới 70 nghìn đồng. Có **32/106 món chưa có giá** trong dữ liệu gốc, tập trung ở Combo (10 món) và Sashimi (cả 9 món) – nếu chatbot trả lời giá các món này sẽ là *bịa*, nên công cụ SQL phải trả về "chưa có thông tin" và chuyển nhân viên. Dữ liệu còn chứa **một xung đột giá** (Khoai tây chiên: 53.900 và 49.000 đồng) cần quản lý xác nhận. Ở bên phải, nhóm dị ứng phổ biến nhất là cá (46% số món), trứng (29%), nhuyễn thể (23%) và giáp xác (20%); rủi ro tập trung ở Maki/Cơm cuộn và Combo. Thông tin dị ứng được **suy luận bằng từ khóa** và gắn cờ `allergen_verified = 0`: chatbot chỉ dùng để cảnh báo sớm và luôn khuyến nghị khách xác nhận với nhân viên.
+
+![Phân phối giá theo danh mục (trái) và tỷ lệ món chứa từng nhóm dị ứng theo danh mục (phải)](images/eda_menu.png){#fig-menu width=100%}
+
+## Quy trình chuẩn bị dữ liệu
+
+**Chuẩn hóa và xử lý ngoại lai.** Văn bản được chuẩn hóa Unicode NFC và khoảng trắng. Tên món được trích từ trường `Domain` rồi ánh xạ về **106 tên món chính tắc** (khớp tên dài nhất trên chuỗi bỏ dấu), loại bỏ các biến thể như "Soda Dâu - Giá cả" hay "Trẻ em - Combo Oishi 4"; các chủ đề không gắn với món cụ thể (dịp lễ, chính sách, chi nhánh) được giữ làm tài liệu chung. Giá được trích bằng biểu thức chính quy, giới hạn trong khoảng 5.000–3.000.000 đồng; giá trị ngoài khoảng được coi là ngoại lai và loại bỏ. Dữ liệu không có giá trị khuyết ở ba trường gốc; giá trị khuyết phát sinh ở trường giá món được **giữ nguyên là NULL** thay vì điền giá trị ước lượng, vì điền sai giá gây thiệt hại trực tiếp đến uy tín nhà hàng.
+
+**Mã hóa và tạo đặc trưng.** Năm đặc trưng mới được tạo từ nghiệp vụ (@tbl-dict): `intent` (gán bằng luật từ khóa có thứ tự ưu tiên), `group_id`, `noisy_input`, `needs_tool` và `difficulty`. Với bài toán sinh văn bản, "mã hóa" tương ứng với việc chuyển mỗi mẫu sang định dạng hội thoại chuẩn gồm lời nhắc hệ thống (system prompt), câu hỏi và câu trả lời, để hàm `apply_chat_template` tự chuyển sang khuôn mẫu riêng của Qwen hoặc LLaMA; các đặc trưng được lưu trong trường `meta`, không đưa vào huấn luyện mà dùng để chia tập, phân tích và đánh giá theo nhóm.
+
+**Chia tập dữ liệu chống rò rỉ.** Dữ liệu được chia bằng `StratifiedGroupKFold` (10 fold, `random_state = 42`): một fold làm tập kiểm tra tổng hợp, một fold làm tập kiểm định, tám fold còn lại làm tập huấn luyện. Việc chia **theo nhóm `group_id`** bảo đảm mọi câu hỏi diễn đạt lại của cùng một đáp án nằm trọn trong một tập (số nhóm giao nhau giữa train và test bằng 0), còn việc **phân tầng theo intent** giữ tỷ trọng các ý định gần như nhau giữa các tập (chênh lệch tối đa 2,4 điểm phần trăm, @fig-intent). Sau đó, mỗi câu hỏi kiểm định và kiểm tra được so với câu huấn luyện gần nhất bằng độ tương đồng cosine trên TF-IDF n-gram ký tự (văn bản bỏ dấu); **144 câu có cosine vượt 0,92** bị loại – chủ yếu là các câu hỏi chung chung lặp lại nguyên văn với nhiều đáp án khác nhau như "giá bao nhiêu". Sau khi lọc, cosine trung bình còn 0,76 và lớn nhất 0,92 (@fig-leak). Phễu xử lý được tóm tắt tại @fig-funnel; kết quả cuối cùng gồm **5.084 mẫu huấn luyện, 565 mẫu kiểm định và 562 mẫu kiểm tra tổng hợp**. Bên cạnh đó, bộ kiểm tra chính (*test-gold*) và bộ kiểm tra đối kháng được nhóm viết tay độc lập, khóa bằng mã băm SHA-256 trước khi huấn luyện.
+
+![Phân phối cosine giữa câu hỏi kiểm định/kiểm tra và câu huấn luyện gần nhất](images/eda_leakage.png){#fig-leak width=75%}
+
+![Phễu dữ liệu hội thoại qua các bước xử lý](images/eda_funnel.png){#fig-funnel width=70%}
+
 ```{=latex}
 \clearpage
 ```

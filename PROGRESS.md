@@ -2,6 +2,26 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-03 (chiều) — T04, T05, T07 (một phần), T08, T09 (phần sparse)
+- **T04** cấu trúc repo `code/ results/ images/ demo/`, `requirements.txt`, `.gitignore`, `.env.example`. Render PDF được
+  (local dùng Liberation Serif thay Times New Roman vì môi trường không có font MS: `-M mainfont="Liberation Serif"`).
+  Vẽ `images/fig_kien_truc.png` (`code/make_fig_architecture.py`) — trước đó thiếu hình làm render lỗi.
+- **T05** `code/src/kimochi/build_kb.py` + `01_build_kb.ipynb`: 106 món chính tắc, 74 có giá; `data/kimochi.db` 6 bảng
+  (bàn/đặt bàn mô phỏng); `data/kb/docs.jsonl` 106 tài liệu món + 545 tài liệu chủ đề. Phát hiện: 32 món thiếu giá (toàn bộ
+  Sashimi), 1 xung đột giá Khoai tây chiên. Sửa 2 lỗi so khớp khi làm: `\\b` thoát sai, "mì" khớp trong "mình".
+- **T07** `prepare_sft.py` + `02_prepare_sft.ipynb`: định dạng messages+meta, 8 intent theo luật, StratifiedGroupKFold theo
+  group_id → train 5.084 / val 565 / test_synth 562; 0 nhóm trùng train↔test; loại 144 câu cosine > 0,92. Chưa làm: mẫu RAFT,
+  tool-call, từ chối (cần LLM thầy + retriever).
+- **T08** `eda.py` + `03_eda.ipynb`: 7 hình `images/eda_*.png`; viết **Phần 3** trong `.qmd` (PDF 24 trang). Phát hiện chính:
+  intent lệch (52% menu_info, đặt bàn 1%), 44% câu hỏi không dấu, 99,3% đáp án dùng chung ≥ 3 câu hỏi.
+- **T09 (sparse)** `retriever.py` + `04_rag.ipynb` trên 369 câu test có gắn món: BM25 R@1 0,827 / R@5 0,949; BM25 + lọc tên
+  món R@1 0,883 / R@5 0,951 / MRR 0,912; RRF với TF-IDF ký tự *giảm* R@1 (0,718). Dense bge-m3 + reranker: `skipped`
+  (Hugging Face bị chặn ở môi trường này) → chạy notebook trên Colab.
+- **T06**: chỉ làm công cụ `code/freeze_tests.py` (kiểm định dạng + SHA-256). Không tự sinh test-gold: luật yêu cầu người viết,
+  không qua LLM.
+- Lưu ý: tài liệu RAG được dựng từ toàn bộ câu trả lời (kể cả của tập test) — hợp lệ vì KB là nguồn sự thật của nhà hàng, nhưng
+  điểm truy xuất trên test_synth vì vậy lạc quan; số chính phải đo trên test-gold.
+
 ### 2026-11-03 — Phân tích repo, lập CLAUDE / SPEC / PROGRESS, tái lập kế hoạch
 - Đọc rubric, kế hoạch 12 ngày (28/10), báo cáo v1, `report_main.qmd`, dữ liệu JSON.
 - Tạo `CLAUDE.md` (luật + cấu trúc), `SPEC.md` (yêu cầu, kiến trúc, thí nghiệm, backlog T00–T18), `PROGRESS.md`.
@@ -22,12 +42,12 @@
 |---|---|---|
 | Trang đầu (bìa, phân công, tuyên bố AI, viết tắt) | 🟡 | còn placeholder trường/khoa/GVHD; thiếu mục lục tự động + DM hình/bảng |
 | I. Bài toán (15%) | ✅ | Phần 1 đủ, ROI có công thức + độ nhạy |
-| Lý thuyết (Phần 2) | ✅ | thiếu 2 hình |
-| II. EDA & tiền xử lý (20%) | ⬜ | có dữ liệu thô, chưa có notebook / Phần 3 |
+| Lý thuyết (Phần 2) | ✅ | đã có hình kiến trúc, còn thiếu logo |
+| II. EDA & tiền xử lý (20%) | ✅ | Phần 3 + notebook 01–03; còn bổ sung mẫu RAFT/tool-call |
 | III. Mô hình (25%) | ⬜ | chưa train |
 | IV. Đánh giá / XAI / đạo đức (15%) | ⬜ | |
 | V. Prototype (15%) | ⬜ | |
-| VI. Trình bày & code (10%) | 🟡 | chưa có `code/`; PDF chưa render thử |
+| VI. Trình bày & code (10%) | 🟡 | `code/` 4 notebook chạy sạch; PDF render được |
 | Bonus | 🟡 | dữ liệu dựa trên nhà hàng thật; chưa có người dùng thử |
 
 ## Phần III. Quyết định

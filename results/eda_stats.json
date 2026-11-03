@@ -1,0 +1,65 @@
+{
+  "intent": {
+    "share": {
+      "complaint": 0.004,
+      "reservation_create": 0.006,
+      "store_info": 0.018,
+      "policy_promo": 0.035,
+      "allergy_diet": 0.125,
+      "recommendation": 0.146,
+      "price_query": 0.149,
+      "menu_info": 0.517
+    },
+    "max_abs_share_gap_train_test": 0.023836556526511177
+  },
+  "lengths": {
+    "q_mean": 9.482140047206924,
+    "q_p95": 16.0,
+    "q_skew": 2.121931696373024,
+    "a_mean": 38.84736757365964,
+    "a_p95": 72.0,
+    "a_skew": 1.2640818922930888,
+    "a_max": 122
+  },
+  "noise": {
+    "noisy_rate": 0.6884343036978757,
+    "unaccented_rate": 0.43981117230527145
+  },
+  "groups": {
+    "groups": 2067,
+    "group_mean": 3.0745041122399615,
+    "share_groups_ge3": 0.9932268988872762
+  },
+  "leakage": {
+    "kept_cos_mean": 0.7605913567963735,
+    "kept_cos_max": 0.9199382828237244
+  },
+  "funnel": {
+    "Mẫu gốc": 6355,
+    "Gán được món cụ thể": 4108,
+    "Câu trả lời khác nhau (nhóm)": 2067,
+    "Giữ sau kiểm rò rỉ": 6211
+  },
+  "menu": {
+    "priced": 74,
+    "items": 106,
+    "price_median": 84000.0,
+    "missing_price_by_cat": {
+      "Combo": 10,
+      "Sashimi": 9,
+      "Món nóng / Khai vị": 6,
+      "Salad": 5,
+      "Maki / Cơm cuộn": 2
+    },
+    "allergen_share": {
+      "cá": 0.46,
+      "giáp xác": 0.2,
+      "gluten": 0.15,
+      "mè": 0.09,
+      "nhuyễn thể": 0.23,
+      "sữa": 0.19,
+      "trứng": 0.29,
+      "đậu nành": 0.08
+    }
+  }
+}

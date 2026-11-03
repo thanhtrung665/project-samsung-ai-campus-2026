@@ -1,0 +1,14 @@
+.env
+__pycache__/
+.ipynb_checkpoints/
+*.aux
+*.log
+*.lof
+*.lot
+*.toc
+*.tex
+report_main_files/
+outputs/
+checkpoints/
+*.safetensors
+*.bin

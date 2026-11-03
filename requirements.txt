@@ -1,0 +1,22 @@
+# Phân tích dữ liệu / KB (chạy CPU)
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+scikit-learn>=1.4
+jupyter
+# RAG
+rank-bm25>=0.2.2
+pyvi>=0.1.1
+sentence-transformers>=3.0
+qdrant-client>=1.9
+# Huấn luyện (Colab/Kaggle GPU)
+transformers>=4.44
+trl>=0.10
+peft>=0.12
+bitsandbytes>=0.43
+accelerate>=0.33
+datasets>=2.20
+optuna>=3.6
+# Đánh giá & demo
+ragas>=0.1
+gradio>=4.40
