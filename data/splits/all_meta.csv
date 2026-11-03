@@ -1616,51 +1616,51 @@ Thời điểm dùng: Đậu Nành Nhật Muối,thoi diem dung dau nanh nhat mu
 Hình ảnh: Đậu Nành Nhật Muối,Có ảnh món Đậu Nành Nhật Muối không shop?,,menu_info,g-13ff55757e,True,False,rag,medium,9,26,kmc-01614,train,
 Hình ảnh: Đậu Nành Nhật Muối,Ảnh Đậu Nành Nhật này đâu dzạ?,,menu_info,g-13ff55757e,False,False,rag,easy,7,26,kmc-01615,train,
 Hình ảnh: Đậu Nành Nhật Muối,hinh anh dau nanh nhat muoi,,menu_info,g-13ff55757e,True,True,rag,easy,6,26,kmc-01616,train,
-Tổng quan: Khoai Tây Chiên,Khoai Tây Chiên là món gì vậy shop?,Khoai tây chiên,menu_info,g-bd95ddb014,True,False,rag,medium,8,37,kmc-01617,train,
-Tổng quan: Khoai Tây Chiên,Khoai Tây Chiên trông cứ lài lài s,Khoai tây chiên,menu_info,g-bd95ddb014,False,False,rag,medium,8,37,kmc-01618,train,
-Tổng quan: Khoai Tây Chiên,khoai tay chien la gi,Khoai tây chiên,menu_info,g-bd95ddb014,True,True,rag,easy,5,37,kmc-01619,train,
-Cách thưởng thức: Khoai Tây Chiên,Khoai Tây Chiên ăn như thế nào là đúng nhất?,Khoai tây chiên,menu_info,g-20ed697737,False,False,rag,medium,10,41,kmc-01620,val,0.7142667101935208
-Cách thưởng thức: Khoai Tây Chiên,An khoai tay chien the nao cho dung vay?,Khoai tây chiên,menu_info,g-20ed697737,True,True,rag,medium,9,41,kmc-01621,val,0.6924132925759761
-Cách thưởng thức: Khoai Tây Chiên,cach thuong thuc khoai tay chien,Khoai tây chiên,menu_info,g-20ed697737,True,True,rag,easy,6,41,kmc-01622,val,0.7030608081444102
-Thành phần nguyên liệu: Khoai Tây Chiên,Khoai Tây Chiên có những nguyên liệu gì vậy ạ?,Khoai tây chiên,menu_info,g-6e8783a3c1,False,False,rag,medium,10,44,kmc-01623,train,
-Thành phần nguyên liệu: Khoai Tây Chiên,Khoai tây làm từ gì?,Khoai tây chiên,menu_info,g-6e8783a3c1,False,False,rag,easy,5,44,kmc-01624,train,
-Thành phần nguyên liệu: Khoai Tây Chiên,nguyen lieu khoai tay chien,Khoai tây chiên,menu_info,g-6e8783a3c1,True,True,rag,easy,5,44,kmc-01625,train,
-Hương vị: Khoai Tây Chiên,Món Khoai Tây Chiên có vị gì ạ?,Khoai tây chiên,menu_info,g-f5775ee304,False,False,rag,medium,8,37,kmc-01626,train,
-Hương vị: Khoai Tây Chiên,Khoai Tây Chiên có giòn hok?,Khoai tây chiên,menu_info,g-f5775ee304,True,False,rag,easy,6,37,kmc-01627,train,
-Hương vị: Khoai Tây Chiên,huong vi khoai tay chien,Khoai tây chiên,menu_info,g-f5775ee304,True,True,rag,easy,5,37,kmc-01628,train,
-Giá: Khoai Tây Chiên,Món Khoai Tây Chiên giá bao nhiêu vậy shop?,Khoai tây chiên,price_query,g-d8c3983c4a,True,False,sql,medium,9,30,kmc-01629,train,
-Giá: Khoai Tây Chiên,Khoai Tây Chiên bao nhiêu cành dzạ?,Khoai tây chiên,price_query,g-d8c3983c4a,False,False,sql,easy,7,30,kmc-01630,train,
-Giá: Khoai Tây Chiên,gia khoai tay chien,Khoai tây chiên,price_query,g-d8c3983c4a,True,True,sql,easy,4,30,kmc-01631,train,
-Thời gian phục vụ: Khoai Tây Chiên,Món khoai tây này làm nhanh không em?,Khoai tây chiên,menu_info,g-6db0745d31,False,False,rag,medium,8,27,kmc-01632,val,0.7822341299636818
-Thời gian phục vụ: Khoai Tây Chiên,Khoai Tây Chiên làm có lẹ hông ad?,Khoai tây chiên,menu_info,g-6db0745d31,True,False,rag,medium,8,27,kmc-01633,val,0.6984598195861116
-Thời gian phục vụ: Khoai Tây Chiên,thoi gian lam khoai tay chien,Khoai tây chiên,menu_info,g-6db0745d31,True,True,rag,easy,6,27,kmc-01634,val,0.7558588436516048
-Khẩu phần: Khoai Tây Chiên,Một phần khoai tây này đủ cho mấy người ăn ạ?,Khoai tây chiên,recommendation,g-3c2fbc244b,False,False,rag,hard,11,29,kmc-01635,train,
-Khẩu phần: Khoai Tây Chiên,Khoai Tây Chiên cho may nguoi an?,Khoai tây chiên,menu_info,g-3c2fbc244b,False,False,rag,easy,7,29,kmc-01636,train,
-Khẩu phần: Khoai Tây Chiên,khau phan khoai tay chien,Khoai tây chiên,menu_info,g-3c2fbc244b,True,True,rag,easy,5,29,kmc-01637,train,
-Nước chấm: Khoai Tây Chiên,Khoai Tây Chiên có nước chấm kèm không ạ?,Khoai tây chiên,menu_info,g-42747f4772,False,False,rag,medium,9,32,kmc-01638,val,0.7983399948667075
-Nước chấm: Khoai Tây Chiên,Khoai Tây Chiên có nước chấm kèm hok?,Khoai tây chiên,menu_info,g-42747f4772,True,False,rag,medium,8,32,kmc-01639,val,0.8246514839145803
-Nước chấm: Khoai Tây Chiên,khoai tay chien co nuoc cham kem khong,Khoai tây chiên,menu_info,g-42747f4772,True,True,rag,medium,8,32,kmc-01640,val,0.7649921537899118
-Đối tượng sử dụng: Khoai Tây Chiên,Ai thì nên dùng món khoai tây này ạ?,Khoai tây chiên,menu_info,g-b4c4f03416,False,False,rag,medium,9,36,kmc-01641,train,
-Đối tượng sử dụng: Khoai Tây Chiên,Ai nen an khoai tay chien nay?,Khoai tây chiên,menu_info,g-b4c4f03416,True,True,rag,easy,7,36,kmc-01642,train,
-Đối tượng sử dụng: Khoai Tây Chiên,ai nen dung khoai tay chien,Khoai tây chiên,menu_info,g-b4c4f03416,True,True,rag,easy,6,36,kmc-01643,train,
-Hương vị chi tiết: Khoai Tây Chiên,Khoai tây chiên có vị gì vậy ạ?,Khoai tây chiên,menu_info,g-7b64c2fd09,False,False,rag,medium,8,32,kmc-01644,train,
-Hương vị chi tiết: Khoai Tây Chiên,"Khoai tây chiên giòn xốp, mặn nhẹ hok?",Khoai tây chiên,menu_info,g-7b64c2fd09,True,False,rag,medium,8,32,kmc-01645,train,
-Hương vị chi tiết: Khoai Tây Chiên,khoai tay chien vi gi,Khoai tây chiên,menu_info,g-7b64c2fd09,True,True,rag,easy,5,32,kmc-01646,train,
-Trẻ em sử dụng: Khoai Tây Chiên,Trẻ con có ăn được Khoai Tây Chiên không ạ?,Khoai tây chiên,allergy_diet,g-01fb83264d,False,False,rag,hard,10,28,kmc-01647,train,
-Trẻ em sử dụng: Khoai Tây Chiên,Tre em an Khoai Tay Chien duoc hok?,Khoai tây chiên,allergy_diet,g-01fb83264d,True,True,rag,hard,8,28,kmc-01648,train,
-Trẻ em sử dụng: Khoai Tây Chiên,tre em an khoai tay chien duoc khong,Khoai tây chiên,allergy_diet,g-01fb83264d,True,True,rag,hard,8,28,kmc-01649,train,
-Phân loại món: Khoai Tây Chiên,Món Khoai Tây Chiên là món khai vị hay món chính vậy shop?,Khoai tây chiên,menu_info,g-276d2d0358,True,False,rag,medium,13,36,kmc-01650,val,0.7981319935759827
-Phân loại món: Khoai Tây Chiên,Khoai Tây Chiên là món chiên đúng hok?,Khoai tây chiên,menu_info,g-276d2d0358,True,False,rag,medium,8,36,kmc-01651,val,0.780283069190116
-Phân loại món: Khoai Tây Chiên,khoai tay chien la mon gi,Khoai tây chiên,menu_info,g-276d2d0358,True,True,rag,easy,6,36,kmc-01652,dropped_leak,0.967827837045889
-Tùy chỉnh: Khoai Tây Chiên,Mình muốn ăn nhạt thì món này có bỏ muối được không?,Khoai tây chiên,menu_info,g-5e47a2757b,False,False,rag,medium,12,34,kmc-01653,train,
-Tùy chỉnh: Khoai Tây Chiên,Khong cho muoi duoc hok?,Khoai tây chiên,menu_info,g-5e47a2757b,True,True,rag,easy,5,34,kmc-01654,train,
-Tùy chỉnh: Khoai Tây Chiên,co the khong cho muoi khong,Khoai tây chiên,menu_info,g-5e47a2757b,True,True,rag,easy,6,34,kmc-01655,train,
-Thời điểm dùng: Khoai Tây Chiên,Khoai Tây Chiên dùng vào bữa nào thì hợp ạ?,Khoai tây chiên,menu_info,g-3adbe35e3b,False,False,rag,medium,10,43,kmc-01656,val,0.6903242045900487
-Thời điểm dùng: Khoai Tây Chiên,Khoai Tây Chiên ăn bữa nào cũng okela hok?,Khoai tây chiên,menu_info,g-3adbe35e3b,True,False,rag,medium,9,43,kmc-01657,val,0.7834436925295852
-Thời điểm dùng: Khoai Tây Chiên,thoi diem dung khoai tay chien,Khoai tây chiên,menu_info,g-3adbe35e3b,True,True,rag,easy,6,43,kmc-01658,val,0.686390763712933
-Hình ảnh: Khoai Tây Chiên,Có ảnh món Khoai Tây Chiên không shop?,Khoai tây chiên,menu_info,g-afec4d5adb,True,False,rag,medium,8,25,kmc-01659,test_synth,0.8041185788925457
-Hình ảnh: Khoai Tây Chiên,Ảnh Khoai Tây Chiên đâu dzạ?,Khoai tây chiên,menu_info,g-afec4d5adb,False,False,rag,easy,6,25,kmc-01660,test_synth,0.7711678184066623
-Hình ảnh: Khoai Tây Chiên,hinh anh khoai tay chien,Khoai tây chiên,menu_info,g-afec4d5adb,True,True,rag,easy,5,25,kmc-01661,test_synth,0.7333740373955925
+Tổng quan: Khoai Tây Chiên,Khoai Tây Chiên là món gì vậy shop?,Khoai Tây Chiên,menu_info,g-bd95ddb014,True,False,rag,medium,8,37,kmc-01617,train,
+Tổng quan: Khoai Tây Chiên,Khoai Tây Chiên trông cứ lài lài s,Khoai Tây Chiên,menu_info,g-bd95ddb014,False,False,rag,medium,8,37,kmc-01618,train,
+Tổng quan: Khoai Tây Chiên,khoai tay chien la gi,Khoai Tây Chiên,menu_info,g-bd95ddb014,True,True,rag,easy,5,37,kmc-01619,train,
+Cách thưởng thức: Khoai Tây Chiên,Khoai Tây Chiên ăn như thế nào là đúng nhất?,Khoai Tây Chiên,menu_info,g-20ed697737,False,False,rag,medium,10,41,kmc-01620,val,0.7142667101935208
+Cách thưởng thức: Khoai Tây Chiên,An khoai tay chien the nao cho dung vay?,Khoai Tây Chiên,menu_info,g-20ed697737,True,True,rag,medium,9,41,kmc-01621,val,0.6924132925759761
+Cách thưởng thức: Khoai Tây Chiên,cach thuong thuc khoai tay chien,Khoai Tây Chiên,menu_info,g-20ed697737,True,True,rag,easy,6,41,kmc-01622,val,0.7030608081444102
+Thành phần nguyên liệu: Khoai Tây Chiên,Khoai Tây Chiên có những nguyên liệu gì vậy ạ?,Khoai Tây Chiên,menu_info,g-6e8783a3c1,False,False,rag,medium,10,44,kmc-01623,train,
+Thành phần nguyên liệu: Khoai Tây Chiên,Khoai tây làm từ gì?,Khoai Tây Chiên,menu_info,g-6e8783a3c1,False,False,rag,easy,5,44,kmc-01624,train,
+Thành phần nguyên liệu: Khoai Tây Chiên,nguyen lieu khoai tay chien,Khoai Tây Chiên,menu_info,g-6e8783a3c1,True,True,rag,easy,5,44,kmc-01625,train,
+Hương vị: Khoai Tây Chiên,Món Khoai Tây Chiên có vị gì ạ?,Khoai Tây Chiên,menu_info,g-f5775ee304,False,False,rag,medium,8,37,kmc-01626,train,
+Hương vị: Khoai Tây Chiên,Khoai Tây Chiên có giòn hok?,Khoai Tây Chiên,menu_info,g-f5775ee304,True,False,rag,easy,6,37,kmc-01627,train,
+Hương vị: Khoai Tây Chiên,huong vi khoai tay chien,Khoai Tây Chiên,menu_info,g-f5775ee304,True,True,rag,easy,5,37,kmc-01628,train,
+Giá: Khoai Tây Chiên,Món Khoai Tây Chiên giá bao nhiêu vậy shop?,Khoai Tây Chiên,price_query,g-d8c3983c4a,True,False,sql,medium,9,30,kmc-01629,train,
+Giá: Khoai Tây Chiên,Khoai Tây Chiên bao nhiêu cành dzạ?,Khoai Tây Chiên,price_query,g-d8c3983c4a,False,False,sql,easy,7,30,kmc-01630,train,
+Giá: Khoai Tây Chiên,gia khoai tay chien,Khoai Tây Chiên,price_query,g-d8c3983c4a,True,True,sql,easy,4,30,kmc-01631,train,
+Thời gian phục vụ: Khoai Tây Chiên,Món khoai tây này làm nhanh không em?,Khoai Tây Chiên,menu_info,g-6db0745d31,False,False,rag,medium,8,27,kmc-01632,val,0.7822341299636818
+Thời gian phục vụ: Khoai Tây Chiên,Khoai Tây Chiên làm có lẹ hông ad?,Khoai Tây Chiên,menu_info,g-6db0745d31,True,False,rag,medium,8,27,kmc-01633,val,0.6984598195861116
+Thời gian phục vụ: Khoai Tây Chiên,thoi gian lam khoai tay chien,Khoai Tây Chiên,menu_info,g-6db0745d31,True,True,rag,easy,6,27,kmc-01634,val,0.7558588436516048
+Khẩu phần: Khoai Tây Chiên,Một phần khoai tây này đủ cho mấy người ăn ạ?,Khoai Tây Chiên,recommendation,g-3c2fbc244b,False,False,rag,hard,11,29,kmc-01635,train,
+Khẩu phần: Khoai Tây Chiên,Khoai Tây Chiên cho may nguoi an?,Khoai Tây Chiên,menu_info,g-3c2fbc244b,False,False,rag,easy,7,29,kmc-01636,train,
+Khẩu phần: Khoai Tây Chiên,khau phan khoai tay chien,Khoai Tây Chiên,menu_info,g-3c2fbc244b,True,True,rag,easy,5,29,kmc-01637,train,
+Nước chấm: Khoai Tây Chiên,Khoai Tây Chiên có nước chấm kèm không ạ?,Khoai Tây Chiên,menu_info,g-42747f4772,False,False,rag,medium,9,32,kmc-01638,val,0.7983399948667075
+Nước chấm: Khoai Tây Chiên,Khoai Tây Chiên có nước chấm kèm hok?,Khoai Tây Chiên,menu_info,g-42747f4772,True,False,rag,medium,8,32,kmc-01639,val,0.8246514839145803
+Nước chấm: Khoai Tây Chiên,khoai tay chien co nuoc cham kem khong,Khoai Tây Chiên,menu_info,g-42747f4772,True,True,rag,medium,8,32,kmc-01640,val,0.7649921537899118
+Đối tượng sử dụng: Khoai Tây Chiên,Ai thì nên dùng món khoai tây này ạ?,Khoai Tây Chiên,menu_info,g-b4c4f03416,False,False,rag,medium,9,36,kmc-01641,train,
+Đối tượng sử dụng: Khoai Tây Chiên,Ai nen an khoai tay chien nay?,Khoai Tây Chiên,menu_info,g-b4c4f03416,True,True,rag,easy,7,36,kmc-01642,train,
+Đối tượng sử dụng: Khoai Tây Chiên,ai nen dung khoai tay chien,Khoai Tây Chiên,menu_info,g-b4c4f03416,True,True,rag,easy,6,36,kmc-01643,train,
+Hương vị chi tiết: Khoai Tây Chiên,Khoai tây chiên có vị gì vậy ạ?,Khoai Tây Chiên,menu_info,g-7b64c2fd09,False,False,rag,medium,8,32,kmc-01644,train,
+Hương vị chi tiết: Khoai Tây Chiên,"Khoai tây chiên giòn xốp, mặn nhẹ hok?",Khoai Tây Chiên,menu_info,g-7b64c2fd09,True,False,rag,medium,8,32,kmc-01645,train,
+Hương vị chi tiết: Khoai Tây Chiên,khoai tay chien vi gi,Khoai Tây Chiên,menu_info,g-7b64c2fd09,True,True,rag,easy,5,32,kmc-01646,train,
+Trẻ em sử dụng: Khoai Tây Chiên,Trẻ con có ăn được Khoai Tây Chiên không ạ?,Khoai Tây Chiên,allergy_diet,g-01fb83264d,False,False,rag,hard,10,28,kmc-01647,train,
+Trẻ em sử dụng: Khoai Tây Chiên,Tre em an Khoai Tay Chien duoc hok?,Khoai Tây Chiên,allergy_diet,g-01fb83264d,True,True,rag,hard,8,28,kmc-01648,train,
+Trẻ em sử dụng: Khoai Tây Chiên,tre em an khoai tay chien duoc khong,Khoai Tây Chiên,allergy_diet,g-01fb83264d,True,True,rag,hard,8,28,kmc-01649,train,
+Phân loại món: Khoai Tây Chiên,Món Khoai Tây Chiên là món khai vị hay món chính vậy shop?,Khoai Tây Chiên,menu_info,g-276d2d0358,True,False,rag,medium,13,36,kmc-01650,val,0.7981319935759827
+Phân loại món: Khoai Tây Chiên,Khoai Tây Chiên là món chiên đúng hok?,Khoai Tây Chiên,menu_info,g-276d2d0358,True,False,rag,medium,8,36,kmc-01651,val,0.780283069190116
+Phân loại món: Khoai Tây Chiên,khoai tay chien la mon gi,Khoai Tây Chiên,menu_info,g-276d2d0358,True,True,rag,easy,6,36,kmc-01652,dropped_leak,0.967827837045889
+Tùy chỉnh: Khoai Tây Chiên,Mình muốn ăn nhạt thì món này có bỏ muối được không?,Khoai Tây Chiên,menu_info,g-5e47a2757b,False,False,rag,medium,12,34,kmc-01653,train,
+Tùy chỉnh: Khoai Tây Chiên,Khong cho muoi duoc hok?,Khoai Tây Chiên,menu_info,g-5e47a2757b,True,True,rag,easy,5,34,kmc-01654,train,
+Tùy chỉnh: Khoai Tây Chiên,co the khong cho muoi khong,Khoai Tây Chiên,menu_info,g-5e47a2757b,True,True,rag,easy,6,34,kmc-01655,train,
+Thời điểm dùng: Khoai Tây Chiên,Khoai Tây Chiên dùng vào bữa nào thì hợp ạ?,Khoai Tây Chiên,menu_info,g-3adbe35e3b,False,False,rag,medium,10,43,kmc-01656,val,0.6903242045900487
+Thời điểm dùng: Khoai Tây Chiên,Khoai Tây Chiên ăn bữa nào cũng okela hok?,Khoai Tây Chiên,menu_info,g-3adbe35e3b,True,False,rag,medium,9,43,kmc-01657,val,0.7834436925295852
+Thời điểm dùng: Khoai Tây Chiên,thoi diem dung khoai tay chien,Khoai Tây Chiên,menu_info,g-3adbe35e3b,True,True,rag,easy,6,43,kmc-01658,val,0.686390763712933
+Hình ảnh: Khoai Tây Chiên,Có ảnh món Khoai Tây Chiên không shop?,Khoai Tây Chiên,menu_info,g-afec4d5adb,True,False,rag,medium,8,25,kmc-01659,test_synth,0.8041185788925457
+Hình ảnh: Khoai Tây Chiên,Ảnh Khoai Tây Chiên đâu dzạ?,Khoai Tây Chiên,menu_info,g-afec4d5adb,False,False,rag,easy,6,25,kmc-01660,test_synth,0.7711678184066623
+Hình ảnh: Khoai Tây Chiên,hinh anh khoai tay chien,Khoai Tây Chiên,menu_info,g-afec4d5adb,True,True,rag,easy,5,25,kmc-01661,test_synth,0.7333740373955925
 Giá & Sợi mì: Mì Udon Xào Hải Sản,Mì Udon Xào Hải Sản giá bao nhiêu vậy ạ?,Mì Udon Xào Hải Sản,price_query,g-82f8bb9721,False,False,sql,medium,10,30,kmc-01662,train,
 Giá & Sợi mì: Mì Udon Xào Hải Sản,Mì Udon Xào Hải Sản bi nhiu dzậy?,Mì Udon Xào Hải Sản,menu_info,g-82f8bb9721,False,False,rag,medium,8,30,kmc-01663,train,
 Giá & Sợi mì: Mì Udon Xào Hải Sản,mi udon xao hai san gia bao nhieu,Mì Udon Xào Hải Sản,price_query,g-82f8bb9721,True,True,sql,medium,8,30,kmc-01664,train,
@@ -1991,36 +1991,36 @@ Nguyên liệu: Trứng ngọt 3 miếng,trung ngot lam tu gi,,menu_info,g-91a9d
 Sẵn có: Trứng ngọt 3 miếng,Trứng ngọt 3 miếng có sẵn không ạ?,,menu_info,g-5e62ef8c64,False,False,rag,medium,8,27,kmc-01989,test_synth,0.8060781271374367
 Sẵn có: Trứng ngọt 3 miếng,Trứng ngọt có hàng liền hok?,,menu_info,g-5e62ef8c64,True,False,rag,easy,6,27,kmc-01990,test_synth,0.7228310739560773
 Sẵn có: Trứng ngọt 3 miếng,trung ngot co san khong,,menu_info,g-5e62ef8c64,True,True,rag,easy,5,27,kmc-01991,test_synth,0.7076682724242539
-Giá và độ giòn: Khoai tây chiên,Khoai tây chiên giá bao nhiêu vậy ạ?,Khoai tây chiên,price_query,g-485afd2bf5,False,False,sql,medium,8,34,kmc-01992,train,
-Giá và độ giòn: Khoai tây chiên,Khoai tây chiên giá bi nhiu dzậy?,Khoai tây chiên,price_query,g-485afd2bf5,False,False,sql,easy,7,34,kmc-01993,train,
-Giá và độ giòn: Khoai tây chiên,khoai tay chien gia bao nhieu,Khoai tây chiên,price_query,g-485afd2bf5,True,True,sql,easy,6,34,kmc-01994,train,
-Sốt kèm: Khoai tây chiên,Khoai tây chiên có sốt gì kèm không ạ?,Khoai tây chiên,menu_info,g-216411bb0d,False,False,rag,medium,9,31,kmc-01995,train,
-Sốt kèm: Khoai tây chiên,Khoai tây chiên có kèm sốt hok?,Khoai tây chiên,menu_info,g-216411bb0d,True,False,rag,easy,7,31,kmc-01996,train,
-Sốt kèm: Khoai tây chiên,khoai tay chien co sot gi,Khoai tây chiên,menu_info,g-216411bb0d,True,True,rag,easy,6,31,kmc-01997,train,
-Khoai tây tươi: Khoai tây chiên,Khoai tây chiên có được làm từ khoai tây tươi không ạ?,Khoai tây chiên,menu_info,g-dbec179838,False,False,rag,medium,12,31,kmc-01998,train,
-Khoai tây tươi: Khoai tây chiên,Khoai tây chiên có tươi hok?,Khoai tây chiên,menu_info,g-dbec179838,True,False,rag,easy,6,31,kmc-01999,train,
-Khoai tây tươi: Khoai tây chiên,khoai tay chien lam tu khoai gi,Khoai tây chiên,menu_info,g-dbec179838,True,True,rag,easy,7,31,kmc-02000,train,
-Kích thước phần: Khoai tây chiên,Một phần khoai tây chiên có nhiều không ạ?,Khoai tây chiên,menu_info,g-6c044458d0,False,False,rag,medium,9,39,kmc-02001,test_synth,0.739757493863847
-Kích thước phần: Khoai tây chiên,Khoai tây chiên có nhiều hok?,Khoai tây chiên,menu_info,g-6c044458d0,True,False,rag,easy,6,39,kmc-02002,test_synth,0.8342256417121322
-Kích thước phần: Khoai tây chiên,mot phan khoai tay chien co nhieu khong,Khoai tây chiên,menu_info,g-6c044458d0,True,True,rag,medium,8,39,kmc-02003,test_synth,0.757551075099731
-Ngấm dầu: Khoai tây chiên,Khoai tây chiên này có bị ngấm dầu không ạ?,Khoai tây chiên,menu_info,g-6bccc37727,False,False,rag,medium,10,39,kmc-02004,train,
-Ngấm dầu: Khoai tây chiên,Khoai tây chiên có béo quá hok?,Khoai tây chiên,allergy_diet,g-6bccc37727,True,False,rag,hard,7,39,kmc-02005,train,
-Ngấm dầu: Khoai tây chiên,khoai tay chien co bi ngam dau khong,Khoai tây chiên,menu_info,g-6bccc37727,True,True,rag,medium,8,39,kmc-02006,train,
-Phù hợp trẻ em: Khoai tây chiên,Khoai tây chiên này có phù hợp với trẻ em không ạ?,Khoai tây chiên,allergy_diet,g-ee06eb7d42,False,False,rag,hard,12,37,kmc-02007,train,
-Phù hợp trẻ em: Khoai tây chiên,Khoai tây chiên bé ăn được hok?,Khoai tây chiên,allergy_diet,g-ee06eb7d42,True,False,rag,hard,7,37,kmc-02008,train,
-Phù hợp trẻ em: Khoai tây chiên,khoai tay chien tre em an duoc khong,Khoai tây chiên,allergy_diet,g-ee06eb7d42,True,True,rag,hard,8,37,kmc-02009,train,
-Thời gian chuẩn bị: Khoai tây chiên,Thời gian chuẩn bị món khoai tây chiên có lâu không ạ?,Khoai tây chiên,menu_info,g-69ff1c02f6,False,False,rag,medium,12,37,kmc-02010,val,0.6439864088179835
-Thời gian chuẩn bị: Khoai tây chiên,Khoai tây chiên có lâu hok?,Khoai tây chiên,menu_info,g-69ff1c02f6,True,False,rag,easy,6,37,kmc-02011,val,0.8452590635556517
-Thời gian chuẩn bị: Khoai tây chiên,khoai tay chien co nhanh khong,Khoai tây chiên,menu_info,g-69ff1c02f6,True,True,rag,easy,6,37,kmc-02012,val,0.8004687321540498
-Kèm muối: Khoai tây chiên,Khoai tây chiên có được rắc muối không ạ?,Khoai tây chiên,menu_info,g-603ef3b1d5,False,False,rag,medium,9,37,kmc-02013,train,
-Kèm muối: Khoai tây chiên,Khoai tây chiên có muối kèm hok?,Khoai tây chiên,menu_info,g-603ef3b1d5,True,False,rag,easy,7,37,kmc-02014,train,
-Kèm muối: Khoai tây chiên,khoai tay chien co muoi khong,Khoai tây chiên,menu_info,g-603ef3b1d5,True,True,rag,easy,6,37,kmc-02015,train,
-Mang về: Khoai tây chiên,Khoai tây chiên có thể mang về được không ạ?,Khoai tây chiên,menu_info,g-cad33b178e,False,False,rag,medium,10,32,kmc-02016,train,
-Mang về: Khoai tây chiên,Khoai tây chiên có ship về được hok?,Khoai tây chiên,policy_promo,g-cad33b178e,True,False,rag,medium,8,32,kmc-02017,train,
-Mang về: Khoai tây chiên,khoai tay chien co mang ve khong,Khoai tây chiên,menu_info,g-cad33b178e,True,True,rag,easy,7,32,kmc-02018,train,
-Khuyến mãi: Khoai tây chiên,Khoai tây chiên có chương trình khuyến mãi nào không ạ?,Khoai tây chiên,policy_promo,g-c6a82d4e4a,False,False,rag,medium,11,37,kmc-02019,train,
-Khuyến mãi: Khoai tây chiên,Khoai tây chiên có KM gì hok?,Khoai tây chiên,policy_promo,g-c6a82d4e4a,True,False,rag,easy,7,37,kmc-02020,train,
-Khuyến mãi: Khoai tây chiên,khoai tay chien co khuyen mai khong,Khoai tây chiên,policy_promo,g-c6a82d4e4a,True,True,rag,easy,7,37,kmc-02021,train,
+Giá và độ giòn: Khoai tây chiên,Khoai tây chiên giá bao nhiêu vậy ạ?,Khoai Tây Chiên,price_query,g-485afd2bf5,False,False,sql,medium,8,34,kmc-01992,train,
+Giá và độ giòn: Khoai tây chiên,Khoai tây chiên giá bi nhiu dzậy?,Khoai Tây Chiên,price_query,g-485afd2bf5,False,False,sql,easy,7,34,kmc-01993,train,
+Giá và độ giòn: Khoai tây chiên,khoai tay chien gia bao nhieu,Khoai Tây Chiên,price_query,g-485afd2bf5,True,True,sql,easy,6,34,kmc-01994,train,
+Sốt kèm: Khoai tây chiên,Khoai tây chiên có sốt gì kèm không ạ?,Khoai Tây Chiên,menu_info,g-216411bb0d,False,False,rag,medium,9,31,kmc-01995,train,
+Sốt kèm: Khoai tây chiên,Khoai tây chiên có kèm sốt hok?,Khoai Tây Chiên,menu_info,g-216411bb0d,True,False,rag,easy,7,31,kmc-01996,train,
+Sốt kèm: Khoai tây chiên,khoai tay chien co sot gi,Khoai Tây Chiên,menu_info,g-216411bb0d,True,True,rag,easy,6,31,kmc-01997,train,
+Khoai tây tươi: Khoai tây chiên,Khoai tây chiên có được làm từ khoai tây tươi không ạ?,Khoai Tây Chiên,menu_info,g-dbec179838,False,False,rag,medium,12,31,kmc-01998,train,
+Khoai tây tươi: Khoai tây chiên,Khoai tây chiên có tươi hok?,Khoai Tây Chiên,menu_info,g-dbec179838,True,False,rag,easy,6,31,kmc-01999,train,
+Khoai tây tươi: Khoai tây chiên,khoai tay chien lam tu khoai gi,Khoai Tây Chiên,menu_info,g-dbec179838,True,True,rag,easy,7,31,kmc-02000,train,
+Kích thước phần: Khoai tây chiên,Một phần khoai tây chiên có nhiều không ạ?,Khoai Tây Chiên,menu_info,g-6c044458d0,False,False,rag,medium,9,39,kmc-02001,test_synth,0.739757493863847
+Kích thước phần: Khoai tây chiên,Khoai tây chiên có nhiều hok?,Khoai Tây Chiên,menu_info,g-6c044458d0,True,False,rag,easy,6,39,kmc-02002,test_synth,0.8342256417121322
+Kích thước phần: Khoai tây chiên,mot phan khoai tay chien co nhieu khong,Khoai Tây Chiên,menu_info,g-6c044458d0,True,True,rag,medium,8,39,kmc-02003,test_synth,0.757551075099731
+Ngấm dầu: Khoai tây chiên,Khoai tây chiên này có bị ngấm dầu không ạ?,Khoai Tây Chiên,menu_info,g-6bccc37727,False,False,rag,medium,10,39,kmc-02004,train,
+Ngấm dầu: Khoai tây chiên,Khoai tây chiên có béo quá hok?,Khoai Tây Chiên,allergy_diet,g-6bccc37727,True,False,rag,hard,7,39,kmc-02005,train,
+Ngấm dầu: Khoai tây chiên,khoai tay chien co bi ngam dau khong,Khoai Tây Chiên,menu_info,g-6bccc37727,True,True,rag,medium,8,39,kmc-02006,train,
+Phù hợp trẻ em: Khoai tây chiên,Khoai tây chiên này có phù hợp với trẻ em không ạ?,Khoai Tây Chiên,allergy_diet,g-ee06eb7d42,False,False,rag,hard,12,37,kmc-02007,train,
+Phù hợp trẻ em: Khoai tây chiên,Khoai tây chiên bé ăn được hok?,Khoai Tây Chiên,allergy_diet,g-ee06eb7d42,True,False,rag,hard,7,37,kmc-02008,train,
+Phù hợp trẻ em: Khoai tây chiên,khoai tay chien tre em an duoc khong,Khoai Tây Chiên,allergy_diet,g-ee06eb7d42,True,True,rag,hard,8,37,kmc-02009,train,
+Thời gian chuẩn bị: Khoai tây chiên,Thời gian chuẩn bị món khoai tây chiên có lâu không ạ?,Khoai Tây Chiên,menu_info,g-69ff1c02f6,False,False,rag,medium,12,37,kmc-02010,val,0.6439864088179835
+Thời gian chuẩn bị: Khoai tây chiên,Khoai tây chiên có lâu hok?,Khoai Tây Chiên,menu_info,g-69ff1c02f6,True,False,rag,easy,6,37,kmc-02011,val,0.8452590635556517
+Thời gian chuẩn bị: Khoai tây chiên,khoai tay chien co nhanh khong,Khoai Tây Chiên,menu_info,g-69ff1c02f6,True,True,rag,easy,6,37,kmc-02012,val,0.8004687321540498
+Kèm muối: Khoai tây chiên,Khoai tây chiên có được rắc muối không ạ?,Khoai Tây Chiên,menu_info,g-603ef3b1d5,False,False,rag,medium,9,37,kmc-02013,train,
+Kèm muối: Khoai tây chiên,Khoai tây chiên có muối kèm hok?,Khoai Tây Chiên,menu_info,g-603ef3b1d5,True,False,rag,easy,7,37,kmc-02014,train,
+Kèm muối: Khoai tây chiên,khoai tay chien co muoi khong,Khoai Tây Chiên,menu_info,g-603ef3b1d5,True,True,rag,easy,6,37,kmc-02015,train,
+Mang về: Khoai tây chiên,Khoai tây chiên có thể mang về được không ạ?,Khoai Tây Chiên,menu_info,g-cad33b178e,False,False,rag,medium,10,32,kmc-02016,train,
+Mang về: Khoai tây chiên,Khoai tây chiên có ship về được hok?,Khoai Tây Chiên,policy_promo,g-cad33b178e,True,False,rag,medium,8,32,kmc-02017,train,
+Mang về: Khoai tây chiên,khoai tay chien co mang ve khong,Khoai Tây Chiên,menu_info,g-cad33b178e,True,True,rag,easy,7,32,kmc-02018,train,
+Khuyến mãi: Khoai tây chiên,Khoai tây chiên có chương trình khuyến mãi nào không ạ?,Khoai Tây Chiên,policy_promo,g-c6a82d4e4a,False,False,rag,medium,11,37,kmc-02019,train,
+Khuyến mãi: Khoai tây chiên,Khoai tây chiên có KM gì hok?,Khoai Tây Chiên,policy_promo,g-c6a82d4e4a,True,False,rag,easy,7,37,kmc-02020,train,
+Khuyến mãi: Khoai tây chiên,khoai tay chien co khuyen mai khong,Khoai Tây Chiên,policy_promo,g-c6a82d4e4a,True,True,rag,easy,7,37,kmc-02021,train,
 Giải thích món: Sò Điệp Áp Chảo Sốt Miso Cay,Cho mình hỏi món Sò Điệp Áp Chảo Sốt Miso Cay là món gì vậy ạ?,Sò Điệp Áp Chảo Sốt Miso Cay,menu_info,g-7713d46458,False,False,rag,medium,16,49,kmc-02022,train,
 Giải thích món: Sò Điệp Áp Chảo Sốt Miso Cay,mon So diep ap chao miso cay la mon j z shop?,Sò Điệp Áp Chảo Sốt Miso Cay,menu_info,g-7713d46458,True,True,rag,medium,12,49,kmc-02023,train,
 Giải thích món: Sò Điệp Áp Chảo Sốt Miso Cay,so diep ap chao miso cay la mon gi,Sò Điệp Áp Chảo Sốt Miso Cay,menu_info,g-7713d46458,True,True,rag,medium,9,49,kmc-02024,train,

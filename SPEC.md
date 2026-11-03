@@ -106,11 +106,12 @@ Trạng thái: ✅ xong · 🟡 đang làm / một phần · ⬜ chưa làm. **�
 | T05 | 03/11 | Trích KB: menu/giá/dị ứng → `kb/menu.csv`, `kimochi.db` (SQLite schema + seed), policies/FAQ; data dictionary | P0 | `01_build_kb.ipynb` chạy; bảng data dictionary | ✅ 03/11 (106 món, 74 có giá) |
 | T06 | 03–04/11 | Viết tay & đóng băng `test_gold` (150) + `test_adv` (80) + 30 kịch bản đặt bàn; SHA-256 | P0 | `data/splits/CHECKSUMS.txt` | 🟡 công cụ `code/freeze_tests.py` xong — **nhóm phải tự viết** |
 | T07 | 04/11 | Chuyển đổi 6.355 mẫu → `messages`+`meta`, gán intent, bổ sung RAFT/tool-call/từ chối (LLM thầy), lọc, split theo group | P0 | `02_prepare_sft.ipynb`, train/val/test_synth.jsonl, phễu lọc | 🟡 chuyển đổi + split xong (5.084/565/562); còn RAFT/tool-call/từ chối |
+| T07b | 03/11 | Bộ dữ liệu SFT v2: làm sạch, giá qua công cụ SQL, RAFT, mẫu khuôn (đặt bàn nhiều lượt, từ chối, khiếu nại), 3 system prompt, dataset card | P0 | `data/splits_v2/` + README, `05_prepare_sft_v2.ipynb` | ✅ 03/11 (4.980 / 580 hội thoại) |
 | T08 | 04–05/11 | EDA 6–8 biểu đồ + nhận xét kinh doanh; viết **Phần 3** | P0 | `03_eda.ipynb`, §3 `.qmd` | ✅ 03/11 (7 hình; token-length chạy trên Colab) |
 | T09 | 05/11 | Hybrid RAG + ablation R1–R5 (Recall@5, MRR, nDCG@5) | P0 | `04_rag.ipynb`, `results/retrieval_test_synth.csv` | 🟡 sparse xong (BM25+lọc R@5 0,951); dense/reranker chạy trên Colab |
 | T10 | 05/11 | Baseline B0/B1/B2 cả 2 model trên test_gold | P0 | `results/baseline.csv` | 🟡 notebook `code/kaggle/K2` sẵn sàng — chờ chạy GPU |
 | T11 | 05–06/11 | Optuna 8 trial Qwen QLoRA; train M1–M4 (1 seed bắt buộc, 3 seed nếu kịp); learning curve | P0 | 4 adapter trên HF Hub, `results/train_matrix.csv`, hình loss | 🟡 notebook K3, K4 sẵn sàng — chờ chạy GPU |
-| T12 | 07/11 | Agent (sql/rag/handoff) gắn M*; chạy kịch bản; confusion matrix công cụ; viết **Phần 4** | P0 | `06_agent.ipynb`, §4 `.qmd` | ⬜ |
+| T12 | 07/11 | Agent (sql/rag/handoff) gắn M* — `tools.py` + `agent.py` đã có (7 công cụ SQLite, vòng lặp tool_call); chạy kịch bản; confusion matrix công cụ; viết **Phần 4** | P0 | `06_agent.ipynb`, §4 `.qmd` | ⬜ |
 | T13 | 07–08/11 | Đánh giá toàn diện (judge hiệu chỉnh, RAGAS, fact-EM, bootstrap), XAI, 10 ca lỗi, đạo đức; viết **Phần 5** | P0 | `07_eval.ipynb`, §5 `.qmd` | ⬜ |
 | T14 | 08/11 | Prototype Gradio + deploy HF Space / video 2–3 phút; viết **Phần 6** | P0 | link demo trong `demo/README.md` | ⬜ |
 | T15 | 08–09/11 | Người dùng thật thử (5–10 người) + phiếu chấm | P1 (bonus) | bảng kết quả trong §6 | ⬜ |

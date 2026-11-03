@@ -92,21 +92,29 @@ def latency_single(model, tok, messages: list[list[dict]], max_new_tokens=192) -
 
 
 # ---------------------------------------------------------------- huấn luyện
-def sft_dataset(root: Path, split: str, frac: float = 1.0, seed: int = 42):
-    """Định dạng prompt/completion hội thoại → TRL chỉ tính loss trên câu trả lời (completion_only_loss)."""
+def sft_dataset(root: Path, split: str, frac: float = 1.0, seed: int = 42, data_dir: str = "splits_v2"):
+    """Mỗi lượt assistant → 1 mẫu prompt (toàn bộ hội thoại trước đó) / completion (đúng lượt đó).
+    TRL chỉ tính loss trên completion → không học các lượt user / kết quả công cụ. Hỗ trợ hội thoại nhiều lượt và gọi công cụ.
+    data_dir: 'splits_v2' (mặc định) hoặc 'splits' (v1, closed-book) để so sánh v1 ↔ v2."""
     from datasets import Dataset
-    df = pd.read_json(root / "data" / "splits" / f"{split}.jsonl", lines=True)
+    df = pd.read_json(root / "data" / data_dir / f"{split}.jsonl", lines=True)
     if frac < 1:
         # lấy mẫu theo nhóm để giữ nguyên tính chất chống rò rỉ
         groups = df["meta"].map(lambda m: m["group_id"])
         keep = pd.Series(groups.unique()).sample(frac=frac, random_state=seed)
         df = df[groups.isin(set(keep))]
-    return Dataset.from_dict({"prompt": [m[:2] for m in df["messages"]], "completion": [m[2:] for m in df["messages"]]})
+    prompts, completions = [], []
+    for msgs in df["messages"]:
+        for i, m in enumerate(msgs):
+            if m["role"] == "assistant":
+                prompts.append(msgs[:i])
+                completions.append([m])
+    return Dataset.from_dict({"prompt": prompts, "completion": completions})
 
 
 def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, lr: float = 2e-4, r: int = 16,
           epochs: float = 2, max_steps: int = -1, data_frac: float = 1.0, max_len: int = 1024, eval_steps: int = 50,
-          per_device_bs: int = 4, grad_accum: int = 4, extra_callbacks=(), report_to="none") -> dict:
+          per_device_bs: int = 4, grad_accum: int = 4, extra_callbacks=(), report_to="none", data_dir: str = "splits_v2") -> dict:
     """Huấn luyện 1 ô ma trận {model} × {LoRA fp16, QLoRA nf4}. Trả về chỉ số tài nguyên + lịch sử loss."""
     torch = _torch()
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
@@ -137,7 +145,8 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
         max_length=max_len, completion_only_loss=True, packing=False, report_to=report_to, gradient_checkpointing=False,
     )
     trainer = SFTTrainer(model=model, args=cfg, processing_class=tok,
-                         train_dataset=sft_dataset(root, "train", data_frac, seed), eval_dataset=sft_dataset(root, "val"),
+                         train_dataset=sft_dataset(root, "train", data_frac, seed, data_dir),
+                         eval_dataset=sft_dataset(root, "val", data_dir=data_dir),
                          callbacks=[EarlyStoppingCallback(early_stopping_patience=3), *extra_callbacks])
     torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
@@ -148,7 +157,7 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
     tok.save_pretrained(out_dir + "/adapter")
     hist = trainer.state.log_history
     res = {"model": model_key, "base": name, "quant": quant, "seed": seed, "lr": lr, "r": r, "data_frac": data_frac,
-           "trainable_params": n_train, "train_minutes": round(minutes, 1),
+           "data": data_dir, "trainable_params": n_train, "train_minutes": round(minutes, 1),
            "peak_vram_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2), "eval_loss": ev["eval_loss"],
            "eval_ppl": math.exp(ev["eval_loss"]), "steps": trainer.state.global_step, "adapter": out_dir + "/adapter"}
     Path(out_dir, "history.json").write_text(json.dumps(hist))

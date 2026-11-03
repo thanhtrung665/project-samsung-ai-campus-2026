@@ -62,7 +62,7 @@ NB["K2_baseline.ipynb"] = [
          "[s for s in ['test_gold', 'test_adv'] if (ROOT / f'data/splits/{s}.jsonl').exists()]\nMODEL_KEYS = ['qwen', 'llama']\nEVAL_SETS"),
     code("from kimochi import prompts, metrics, llm, retriever\nshots = prompts.pick_shots()\nR = retriever.HybridRetriever(retriever.load_docs())\n"
          "docs_by_id = {d['doc_id']: d for d in R.docs}\nGEN = RES / 'gen'; GEN.mkdir(exist_ok=True)\n\n"
-         "def contexts(q, k=3):\n    return [docs_by_id[i] for i in R.search(q, 'bm25_filter', k=k)]"),
+         "def contexts(q, k=3):\n    return R.search_chunks(q, 'bm25_filter', k=k)"),
     code("rows = []\nfor mk in MODEL_KEYS:\n    model, tok, name = llm.load(mk, 'fp16')\n    for es in EVAL_SETS:\n"
          "        ev = prompts.load_eval_set(es)\n        ev = ev.head(N_EVAL) if N_EVAL else ev\n"
          "        for mode in ['zero', 'few', 'rag']:\n"
@@ -122,13 +122,17 @@ NB["K4_train_matrix.ipynb"] = [
     code("from kimochi import llm\nbest_path = RES / 'optuna_best.json'\n"
          "HP = json.loads(best_path.read_text())['best_params'] if best_path.exists() else {'r': 16, 'lr': 2e-4}\n"
          "CELLS = [('qwen', 'nf4'), ('qwen', 'fp16'), ('llama', 'nf4'), ('llama', 'fp16')]\nSEEDS = [42]        # thêm 7, 1234 nếu còn GPU (mean ± std)\n"
-         "EPOCHS = 2\nHF_USER = None      # vd 'thanhtrung665' → đẩy adapter lên HF Hub (private)\nprint(HP)"),
+         "EPOCHS = 2\nDATA_DIR = 'splits_v2'   # bộ dữ liệu v2 (mặc định); 'splits' = v1 closed-book\nHF_USER = None      # vd 'thanhtrung665' → đẩy adapter lên HF Hub (private)\nprint(HP)"),
     code("results = []\nfor mk, q in CELLS:\n    for seed in SEEDS:\n        out = f'/kaggle/working/runs/{mk}_{q}_s{seed}'\n"
          "        if Path(out, 'result.json').exists():\n            results.append(json.loads(Path(out, 'result.json').read_text())); continue\n"
-         "        res = llm.train(ROOT, mk, q, out, seed=seed, lr=HP['lr'], r=HP['r'], epochs=EPOCHS)\n"
+         "        res = llm.train(ROOT, mk, q, out, seed=seed, lr=HP['lr'], r=HP['r'], epochs=EPOCHS, data_dir=DATA_DIR)\n"
          "        if HF_USER:\n            res['hub'] = llm.push_adapter(res['adapter'], f'{HF_USER}/kimochi-{mk}-{q}-s{seed}')\n"
          "        results.append(res); print(res)\n        pd.DataFrame(results).to_csv(RES / 'train_matrix.csv', index=False)\n"
          "pd.DataFrame(results)"),
+    md("## Ablation dữ liệu v1 ↔ v2 (cùng model, cùng siêu tham số) — chứng minh tác dụng của làm sạch, RAFT, mẫu công cụ"),
+    code("out = '/kaggle/working/runs/qwen_nf4_s42_v1data'\nif not Path(out, 'result.json').exists():\n"
+         "    r1 = llm.train(ROOT, 'qwen', 'nf4', out, lr=HP['lr'], r=HP['r'], epochs=EPOCHS, data_dir='splits')\n"
+         "    pd.DataFrame([r1]).to_csv(RES / 'train_v1data.csv', index=False)\nprint(json.loads(Path(out, 'result.json').read_text()))"),
     md("## Đường cong loss (phát hiện quá khớp)"),
     code("import matplotlib.pyplot as plt\nfig, axes = plt.subplots(1, len(CELLS), figsize=(4 * len(CELLS), 3.2), sharey=True)\n"
          "for ax, (mk, q) in zip(axes, CELLS):\n    h = json.loads(Path(f'/kaggle/working/runs/{mk}_{q}_s{SEEDS[0]}/history.json').read_text())\n"
@@ -155,13 +159,13 @@ NB["K5_eval.ipynb"] = [
        "Add Data: dataset repo + output của K4 (thư mục `runs/`) hoặc dùng adapter trên HF Hub."),
     code(INSTALL + "\n!pip install -q google-genai"),
     code(SETUP),
-    code("from kimochi import prompts, metrics, llm, retriever\n"
+    code("from kimochi import prompts, metrics, llm, retriever, agent\nimport shutil\n"
          "ADAPTERS = {Path(p).parent.name: str(Path(p).parent / 'adapter') for p in glob.glob('/kaggle/input/**/runs/*/result.json', recursive=True)\n"
          "            if not Path(p).parent.name.startswith('lc_')}\n"
          "# hoặc: ADAPTERS = {'qwen_nf4_s42': '<user>/kimochi-qwen-nf4-s42', ...}\nprint(ADAPTERS)\n"
          "EVAL_SETS = ['test_synth'] + [s for s in ['test_gold', 'test_adv'] if (ROOT / f'data/splits/{s}.jsonl').exists()]\n"
          "R = retriever.HybridRetriever(retriever.load_docs()); docs_by_id = {d['doc_id']: d for d in R.docs}\n"
-         "ctx = lambda q: [docs_by_id[i] for i in R.search(q, 'bm25_filter', k=3)]\nGEN = RES / 'gen'; GEN.mkdir(exist_ok=True)"),
+         "ctx = lambda q: R.search_chunks(q, 'bm25_filter', k=3)\nGEN = RES / 'gen'; GEN.mkdir(exist_ok=True)"),
     code("rows = []\nfor run, ad in ADAPTERS.items():\n    mk, q = run.split('_')[:2]\n    model, tok, _ = llm.load(mk, q, adapter=ad)\n"
          "    for es in EVAL_SETS:\n        ev = prompts.load_eval_set(es)\n        for mode in ['closed', 'rag']:\n"
          "            msgs = [prompts.build_messages(x, 'rag' if mode == 'rag' else 'zero', docs=ctx(x) if mode == 'rag' else None) for x in ev['query']]\n"
@@ -169,6 +173,15 @@ NB["K5_eval.ipynb"] = [
          "            out = ev.assign(pred=preds, latency_batch_s=lat, system=f'{run}_{mode}', eval_set=es)\n"
          "            out.to_json(GEN / f'{run}_{mode}_{es}.jsonl', orient='records', lines=True, force_ascii=False)\n"
          "            rows.append({'system': f'{run}_{mode}', 'eval_set': es, **metrics.summarize(metrics.score_generations(out))}); print(rows[-1])\n"
+         "        # chế độ agent: system có mô tả công cụ + ngữ cảnh RAG; công cụ chạy trên BẢN SAO DB\n"
+         "        db = Path('/kaggle/working/eval.db'); shutil.copy(ROOT / 'data/kimochi.db', db)\n"
+         "        ag = agent.run_batch(model, tok, list(ev['query']), db, contexts=[ctx(x) for x in ev['query']])\n"
+         "        out = ev.assign(pred=[a['pred'] for a in ag], latency_batch_s=[a['latency_batch_s'] for a in ag],\n"
+         "                        tools_called=[a['tools_called'] for a in ag], system=f'{run}_agent', eval_set=es)\n"
+         "        out.to_json(GEN / f'{run}_agent_{es}.jsonl', orient='records', lines=True, force_ascii=False)\n"
+         "        sm = metrics.summarize(metrics.score_generations(out))\n"
+         "        sm['tool_call_rate_price'] = float(out[out.intent == 'price_query'].tools_called.map(lambda t: 'get_menu_item' in t).mean())\n"
+         "        rows.append({'system': f'{run}_agent', 'eval_set': es, **sm}); print(rows[-1])\n"
          "    q30 = prompts.load_eval_set('test_synth').head(30)['query']\n"
          "    lat1 = llm.latency_single(model, tok, [prompts.build_messages(x, 'rag', docs=ctx(x)) for x in q30])\n"
          "    rows.append({'system': f'{run}_rag', 'eval_set': 'latency30', 'latency_p50': float(pd.Series(lat1).median()),\n"

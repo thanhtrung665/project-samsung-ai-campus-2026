@@ -49,7 +49,20 @@ for name, cells in NB.items():
     nbf.write(nb, HERE / name)
     print("wrote", name)
 
-NB2 = {"04_rag.ipynb": [
+NB2 = {"05_prepare_sft_v2.ipynb": [
+  ("md", "# 05 · Bộ dữ liệu SFT v2 (T07b)\nLàm sạch, giá qua công cụ SQL, RAFT, mẫu khuôn (đặt bàn nhiều lượt, từ chối, khiếu nại…). "
+         "Dataset card: `data/splits_v2/README.md`."),
+  ("code", SETUP),
+  ("code", "from kimochi import prepare_sft_v2\ns = prepare_sft_v2.main()\n{k: v for k, v in s.items() if k not in ('format_by_split', 'intent_by_split')}"),
+  ("code", "pd.DataFrame(s['format_by_split']).fillna(0).astype(int)"),
+  ("code", "pd.DataFrame(s['intent_by_split']).fillna(0).astype(int)"),
+  ("code", "rows = pd.read_json('../data/splits_v2/train.jsonl', lines=True)\n"
+           "for fmt in ['tool_price', 'raft_neg', 'reservation_mt']:\n"
+           "    r = rows[rows.meta.map(lambda m: m['format']) == fmt].iloc[0]\n    print('=====', fmt)\n"
+           "    for m in r.messages[1:]:\n        print(f\"  [{m['role']}] {m['content'][:200]}\")"),
+  ("code", "from kimochi import llm\nfrom pathlib import Path\nprint('Số mẫu huấn luyện sau khi tách theo lượt assistant:', len(llm.sft_dataset(Path('..').resolve(), 'train')))"),
+],
+"04_rag.ipynb": [
   ("md", "# 04 · Hybrid RAG & ablation truy xuất (T09)\nCấu hình: BM25, TF-IDF ký tự, dense bge-m3, RRF, reranker bge-reranker-v2-m3, lọc theo tên món.\n"
          "Dense/reranker cần Hugging Face (Colab): `pip install sentence-transformers`. Cấu hình không chạy được ghi `skipped`."),
   ("code", SETUP),

@@ -503,6 +503,19 @@ Cơ sở dữ liệu `kimochi.db` gồm sáu bảng: `categories` (9 danh mục)
 
 ![Phễu dữ liệu hội thoại qua các bước xử lý](images/eda_funnel.png){#fig-funnel width=70%}
 
+
+## Xây dựng bộ dữ liệu huấn luyện v2
+
+Các phát hiện ở mục EDA cho thấy bộ dữ liệu kế thừa **chưa phù hợp để tinh chỉnh trực tiếp**: 975 câu trả lời trong tập huấn luyện chứa con số giá (trong đó có giá mâu thuẫn), không có mẫu từ chối, không có hội thoại nhiều lượt, không có mẫu gọi công cụ và không có mẫu kèm ngữ cảnh truy xuất – trong khi hệ thống khi vận hành luôn nhận ngữ cảnh RAG và phải gọi công cụ SQL. Nguyên tắc thiết kế bộ dữ liệu v2 là **tinh chỉnh dạy hành vi, cơ sở dữ liệu cung cấp sự thật**. Bộ dữ liệu v2 được sinh hoàn toàn bằng mã (`prepare_sft_v2.py`, seed cố định, kết quả tái lập được) qua năm bước:
+
+1. **Làm sạch:** loại 60 cặp hỏi – đáp trùng lặp và 239 dòng thuộc các câu hỏi giống nhau nhưng có đáp án khác nhau (nhãn mâu thuẫn).
+2. **Không học thuộc giá:** 235 câu hỏi giá được chuyển thành mẫu **gọi công cụ** `get_menu_item`; kết quả công cụ được lấy trực tiếp từ cơ sở dữ liệu và câu trả lời được chuẩn hóa theo giá trong cơ sở dữ liệu (món chưa có giá → mẫu từ chối có căn cứ). Phần giá trong 839 câu trả lời không hỏi giá (chủ yếu là câu gợi ý thực đơn) được xóa; 40 dòng có giá mâu thuẫn không giải thích được hoặc không xóa sạch được bị loại.
+3. **Mẫu RAFT** \[19\]: 1.077 mẫu gồm câu hỏi kèm một đoạn tài liệu đúng và hai đoạn nhiễu khó (hard negative do BM25 truy xuất); 20% mẫu chỉ chứa tài liệu nhiễu và đáp án chuẩn là từ chối, nhằm dạy mô hình **không bịa khi truy xuất sai**. Ngữ cảnh dùng đúng định dạng và đơn vị đoạn (≤ 600 ký tự) như khi hệ thống vận hành.
+4. **Mẫu theo khuôn** (257 mẫu, do người viết khuôn, chạy công cụ thật trên bản sao cơ sở dữ liệu): hội thoại đặt bàn nhiều lượt có bước **xác nhận lại trước khi ghi** (thể hiện nguyên tắc human-in-the-loop), tra cứu chi nhánh, tìm món theo ngân sách và nhóm dị ứng, khiếu nại → chuyển nhân viên, câu hỏi ngoài phạm vi và tấn công prompt injection → từ chối, chào hỏi.
+5. **Đa dạng hóa lời nhắc hệ thống:** ba biến thể system prompt để tránh mô hình phụ thuộc vào một cách diễn đạt duy nhất.
+
+Kết quả gồm **4.980 hội thoại huấn luyện và 580 hội thoại kiểm định**, trong đó 433 hội thoại nhiều lượt. Khi huấn luyện, mỗi lượt trả lời của trợ lý được tách thành một mẫu riêng, với toàn bộ hội thoại trước đó làm ngữ cảnh và hàm mất mát chỉ tính trên lượt trả lời đó. Cách làm này bảo đảm mô hình không học các lượt của khách hay nội dung trả về từ công cụ. Phép chia tập kế thừa nguyên `group_id` của bộ dữ liệu gốc, và **tập kiểm tra được giữ nguyên** để so sánh công bằng hai phiên bản dữ liệu; một thí nghiệm đối chứng huấn luyện cùng cấu hình trên dữ liệu v1 và v2 được trình bày ở Phần 4. Toàn bộ quy trình và hạn chế được mô tả trong thẻ dữ liệu (dataset card) đi kèm `data/splits_v2/README.md`.
+
 ```{=latex}
 \clearpage
 ```

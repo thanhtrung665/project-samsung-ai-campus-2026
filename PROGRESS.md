@@ -2,6 +2,22 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-03 (đêm) — T07b bộ dữ liệu SFT v2
+- `prepare_sft_v2.py` + `05_prepare_sft_v2.ipynb` → `data/splits_v2/{train,val}.jsonl` (4.980 / 580 hội thoại, 433 nhiều lượt)
+  + dataset card `data/splits_v2/README.md`. Làm sạch (−60 trùng, −239 nhãn mâu thuẫn); 235 câu hỏi giá → gọi `get_menu_item`
+  (giá theo DB); xóa giá trong 839 câu trả lời khác, loại 40 dòng giá mâu thuẫn; 1.077 mẫu RAFT (20% chỉ nhiễu → từ chối);
+  257 mẫu khuôn (đặt bàn nhiều lượt có xác nhận trước khi ghi, chi nhánh, tìm món, khiếu nại, ngoài phạm vi / injection, chào hỏi);
+  3 biến thể system prompt. Test giữ nguyên v1 để so sánh v1 ↔ v2.
+- `tools.py` (7 công cụ SQLite tham số hóa, định dạng `<tool_call>{json}</tool_call>`), `agent.py` (vòng lặp công cụ, chạy
+  trên bản sao DB). KB chia chunk ≤ 600 ký tự (`data/kb/chunks.jsonl`, 1.019 chunk) để ngữ cảnh huấn luyện = ngữ cảnh chạy thật;
+  retriever chuyển sang chunk: BM25 + lọc R@1 0,928 / R@5 0,965.
+- `llm.sft_dataset`: mỗi lượt assistant → 1 mẫu prompt/completion (5.883 mẫu từ v2); mặc định `splits_v2`. K4 thêm ablation
+  dữ liệu v1 ↔ v2; K5 thêm chế độ `agent` (đo tỷ lệ gọi công cụ cho câu hỏi giá).
+- **Sửa tính tái lập:** sắp xếp tên món theo độ dài bị phụ thuộc thứ tự `set` (hash ngẫu nhiên), mã đặt bàn dùng uuid4 →
+  nay cố định; kiểm 3 lần chạy cho cùng md5. Sửa cột dị ứng rỗng trong `eda_menu.png`.
+- Báo cáo: thêm mục "Xây dựng bộ dữ liệu huấn luyện v2" cuối Phần 3 (PDF 25 trang).
+- Việc còn lại cho dữ liệu: mẫu sinh bằng LLM thầy cho câu đa dạng hơn (tùy chọn), test-gold viết tay (T06, nhóm).
+
 ### 2026-11-03 (tối) — Notebook Kaggle cho T09–T13; sửa nhãn intent; phát hiện giá trộn VAT
 - `code/kaggle/K1–K5` + `README.md` (hướng dẫn upload dataset, secrets, thứ tự chạy). Module mới `kaggle_env.py`, `prompts.py`,
   `metrics.py` (ROUGE-L, fact-EM giá, bịa giá, từ chối, bootstrap, judge Gemini), `llm.py` (nạp model, sinh theo lô, train
@@ -70,3 +86,5 @@
 | 28/10 | Thay K-Fold bằng 3 seed + paired bootstrap | K-Fold với LLM tốn K lần chi phí |
 | 03/11 | `group_id` = câu trả lời chuẩn hóa của dữ liệu cũ | 6.069 câu hỏi / 2.068 đáp án → tránh rò rỉ diễn đạt lại |
 | 03/11 | Kimochi = nhà hàng thật 2 chi nhánh; phần giao dịch là mô phỏng | Khớp Phần 1, giữ cơ hội điểm thưởng |
+| 03/11 | Huấn luyện trên dữ liệu v2; giá chỉ qua công cụ `get_menu_item` | 26/74 món có giá mâu thuẫn trong dữ liệu gốc |
+| 03/11 | Gọi công cụ dạng văn bản `<tool_call>{json}</tool_call>` thay vì trường `tool_calls` | Không phụ thuộc chat template, Arrow lưu được, Qwen/LLaMA đều sinh được |

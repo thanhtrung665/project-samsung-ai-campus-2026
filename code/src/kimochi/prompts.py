@@ -38,8 +38,9 @@ def pick_shots(seed: int = 42) -> list[tuple[str, str]]:
     return [tuple(tr[tr.intent == it].sample(1, random_state=seed)[["query", "reference"]].iloc[0]) for it in SHOT_INTENTS]
 
 
-def format_context(docs: list[dict], max_chars: int = 700) -> str:
-    return "\n".join(f"[{d['doc_id']}] {d['title']}: {d['text'][:max_chars]}" for d in docs)
+def format_context(chunks: list[dict]) -> str:
+    """Định dạng ngữ cảnh DUY NHẤT cho cả huấn luyện (RAFT) và suy luận — chunk đã ≤ 600 ký tự nên không cắt."""
+    return "\n".join(f"[{c.get('chunk_id', c['doc_id'])}] {c['title']}: {c['text']}" for c in chunks)
 
 
 def build_messages(query: str, mode: str = "zero", shots=None, docs=None) -> list[dict]:

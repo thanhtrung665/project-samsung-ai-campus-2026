@@ -6,7 +6,7 @@
   "items_with_price": 74,
   "items_price_conflict": 1,
   "price_conflicts": {
-    "Khoai tây chiên": {
+    "Khoai Tây Chiên": {
       "53900": 1,
       "49000": 1
     }
@@ -176,6 +176,7 @@
       }
     }
   },
+  "chunks": 1019,
   "docs_menu": 106,
   "docs_policy": 545,
   "category_counts": {

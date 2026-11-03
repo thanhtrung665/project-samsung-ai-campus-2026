@@ -1,0 +1,88 @@
+{
+  "split_sizes": {
+    "train": 4980,
+    "val": 580
+  },
+  "cleaning_log": {
+    "drop_exact_duplicate": 60,
+    "drop_conflicting_question": 239,
+    "price_stripped": 839,
+    "drop_price_inconsistent": 7,
+    "drop_price_unstrippable": 33
+  },
+  "source": {
+    "kimochi_v1": 3991,
+    "kimochi_v1+raft": 1077,
+    "template_v2": 257,
+    "kimochi_v1+db": 235
+  },
+  "format_by_split": {
+    "train": {
+      "chitchat": 16,
+      "closed_book": 3587,
+      "handoff": 13,
+      "oos_code": 6,
+      "oos_competitor": 6,
+      "oos_general": 7,
+      "oos_homework": 5,
+      "oos_injection": 9,
+      "oos_medical": 4,
+      "raft_neg": 213,
+      "raft_pos": 748,
+      "reservation_mt": 127,
+      "reservation_unavailable": 12,
+      "tool_branch": 6,
+      "tool_no_price": 3,
+      "tool_price": 207,
+      "tool_search": 11
+    },
+    "val": {
+      "chitchat": 1,
+      "closed_book": 404,
+      "handoff": 1,
+      "oos_code": 0,
+      "oos_competitor": 0,
+      "oos_general": 1,
+      "oos_homework": 1,
+      "oos_injection": 3,
+      "oos_medical": 0,
+      "raft_neg": 28,
+      "raft_pos": 88,
+      "reservation_mt": 19,
+      "reservation_unavailable": 2,
+      "tool_branch": 4,
+      "tool_no_price": 2,
+      "tool_price": 23,
+      "tool_search": 3
+    }
+  },
+  "intent_by_split": {
+    "train": {
+      "allergy_diet": 576,
+      "chitchat": 16,
+      "complaint": 31,
+      "menu_info": 2858,
+      "out_of_scope": 37,
+      "policy_promo": 177,
+      "price_query": 342,
+      "recommendation": 677,
+      "reservation_create": 168,
+      "store_info": 98
+    },
+    "val": {
+      "allergy_diet": 65,
+      "chitchat": 1,
+      "complaint": 4,
+      "menu_info": 326,
+      "out_of_scope": 5,
+      "policy_promo": 16,
+      "price_query": 45,
+      "recommendation": 78,
+      "reservation_create": 25,
+      "store_info": 15
+    }
+  },
+  "multi_turn": 433,
+  "assistant_turns_total": 6547,
+  "system_prompt_variants": 3
+}

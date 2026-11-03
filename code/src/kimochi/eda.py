@@ -114,6 +114,7 @@ def fig_menu(menu: pd.DataFrame):
     ax[0].boxplot([m.loc[m.category == c, "price_vnd"] / 1000 for c in order], orientation="horizontal", tick_labels=list(order))
     ax[0].set_xlabel("Giá (nghìn đồng)"); ax[0].set_title(f"Giá theo danh mục ({len(m)}/{len(menu)} món có giá)")
     al = menu["allergens"].fillna("").str.get_dummies(sep=";")
+    al = al.drop(columns=[c for c in al.columns if not c.strip()])
     by_cat = al.groupby(menu["category"]).mean()
     im = ax[1].imshow(by_cat.values, cmap="Reds", vmin=0, vmax=1, aspect="auto")
     ax[1].set_xticks(range(by_cat.shape[1]), by_cat.columns, rotation=45, ha="right")
