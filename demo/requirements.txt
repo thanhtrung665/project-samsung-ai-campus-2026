@@ -1,0 +1,11 @@
+gradio==5.49.1
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.4
+rank-bm25>=0.2.2
+# backend LLM (KIMOCHI_BACKEND=hf, cần GPU)
+transformers==4.56.2
+peft==0.17.0
+bitsandbytes==0.47.0
+accelerate>=1.4
+torch

@@ -214,6 +214,57 @@ NB["K5_eval.ipynb"] = [
          "worst.to_csv(RES / 'error_cases.csv', index=False); worst"),
 ]
 
+# ---------------------------------------------------------------------------------------------- K6 agent
+NB["K6_agent_eval.ipynb"] = [
+    md("# K6 · Đánh giá Agent (T12): kịch bản đặt bàn nhiều lượt + định tuyến công cụ\n"
+       "Kịch bản: `data/splits/scenarios.jsonl` (viết tay). Nếu chưa có → dùng kịch bản **proxy** dựng từ val v2 (chỉ kiểm tra "
+       "pipeline, không phải số chính thức). Công cụ chạy trên bản sao DB. Định tuyến công cụ: đọc file `gen/*_agent_*.jsonl` "
+       "của K5 (Add Data: output K5) hoặc tự chạy trên test_synth."),
+    code(INSTALL),
+    code(SETUP),
+    code("from kimochi import llm, agent_eval as E, prompts, retriever, agent\nimport shutil\n"
+         "ADAPTER = None   # None = tự tìm adapter tốt nhất trong output K4\nMODEL, QUANT = 'qwen', 'nf4'\n"
+         "if ADAPTER is None:\n    found = sorted(glob.glob('/kaggle/input/**/runs/*_s42/adapter', recursive=True))\n"
+         "    ADAPTER = found[0] if found else None\n    if ADAPTER: MODEL, QUANT = Path(ADAPTER).parent.name.split('_')[:2]\n"
+         "print(MODEL, QUANT, ADAPTER)\nmodel, tok, _ = llm.load(MODEL, QUANT, adapter=ADAPTER)\n"
+         "gen = lambda msgs: llm.generate(model, tok, [msgs], bs=1)[0][0]"),
+    md("## Kịch bản nhiều lượt"),
+    code("sc_path = ROOT / 'data/splits/scenarios.jsonl'\nif sc_path.exists():\n    scs = [json.loads(l) for l in sc_path.read_text(encoding='utf-8').splitlines() if l.strip()]; kind = 'viết tay'\n"
+         "else:\n    scs = E.scenarios_from_v2_val(ROOT); kind = 'PROXY (val v2)'\nprint(len(scs), 'kịch bản', kind)\n"
+         "W = Path('/kaggle/working/sc'); W.mkdir(exist_ok=True)\nres = pd.DataFrame([E.run_scenario(sc, gen, ROOT / 'data/kimochi.db', W) for sc in scs])\n"
+         "res['kind'] = kind; res.to_json(RES / 'agent_scenarios.jsonl', orient='records', lines=True, force_ascii=False)\n"
+         "summary = {'kind': kind, 'n': len(res), 'task_success': res.success.mean(), 'db_state_ok': res.db_state_ok.mean(),\n"
+         "           'hitl_ok': res.hitl_ok.mean(), 'avg_tool_calls': res.n_tool_calls.mean()}\n"
+         "(RES / 'agent_summary.json').write_text(json.dumps(summary, indent=1, default=float)); summary"),
+    code("res[~res.success][['id', 'db_state_ok', 'hitl_ok', 'tools', 'answers']].head(10)  # phân tích lỗi"),
+    md("## Định tuyến công cụ (confusion matrix + chi phí kinh doanh)"),
+    code("files = glob.glob('/kaggle/input/**/gen/*_agent_test_*.jsonl', recursive=True)\n"
+         "if files:\n    ag = pd.read_json(sorted(files)[0], lines=True); src = Path(sorted(files)[0]).name\n"
+         "else:\n    ev = prompts.load_eval_set('test_synth')\n    R = retriever.HybridRetriever(retriever.load_docs())\n"
+         "    db = Path('/kaggle/working/route.db'); shutil.copy(ROOT / 'data/kimochi.db', db)\n"
+         "    out = agent.run_batch(model, tok, list(ev['query']), db, contexts=[R.search_chunks(q, 'bm25_filter', k=3) for q in ev['query']])\n"
+         "    ag = ev.assign(tools_called=[o['tools_called'] for o in out]); src = 'test_synth (chạy trực tiếp)'\n"
+         "rep = E.routing_report(ag)\nprint(src, '| accuracy', round(rep['accuracy'], 3), '| macro-F1', round(rep['macro_f1'], 3), '| chi phí / 100 câu', round(rep['cost_per_100'], 1))\n"
+         "rep['confusion'].to_csv(RES / 'tool_routing_confusion.csv'); rep['per_label'].to_csv(RES / 'tool_routing_per_label.csv')\n"
+         "(RES / 'tool_routing_summary.json').write_text(json.dumps({k: rep[k] for k in ('accuracy', 'macro_f1', 'business_cost', 'cost_per_100')} | {'source': src}, indent=1))\n"
+         "E.plot_confusion(rep['confusion'], RES / 'tool_routing_confusion.png'); display(rep['confusion']); rep['per_label'].round(3)"),
+]
+
+# ---------------------------------------------------------------------------------------------- K7 demo
+NB["K7_demo.ipynb"] = [
+    md("# K7 · Chạy demo Gradio với mô hình tinh chỉnh tốt nhất (T14)\n"
+       "Tạo link công khai `*.gradio.live` (hiệu lực 72 giờ) để quay video 2–3 phút hoặc cho người dùng thật thử (T15). "
+       "Add Data: dataset repo + output K4 (hoặc đặt `ADAPTER` = HF repo). Kịch bản quay: `demo/README.md`."),
+    code(INSTALL + "\n!pip install -q gradio==5.49.1"),
+    code(SETUP),
+    code("ADAPTER = None   # vd '/kaggle/input/kimochi-k4/runs/qwen_nf4_s42/adapter' hoặc 'user/kimochi-qwen-nf4-s42'\n"
+         "MODEL, QUANT = 'qwen', 'nf4'\n"
+         "if ADAPTER is None:\n    found = sorted(glob.glob('/kaggle/input/**/runs/*_s42/adapter', recursive=True))\n"
+         "    ADAPTER = found[0] if found else None\nprint('Adapter:', ADAPTER)\n"
+         "os.environ.update({'KIMOCHI_BACKEND': 'hf', 'KIMOCHI_MODEL': MODEL, 'KIMOCHI_QUANT': QUANT, 'KIMOCHI_ADAPTER': ADAPTER or ''})"),
+    code("sys.path.insert(0, str(ROOT / 'demo'))\nimport app\napp.demo.queue().launch(share=True, debug=True)  # dừng ô này để tắt demo"),
+]
+
 
 if __name__ == "__main__":
     for name, cells in NB.items():
