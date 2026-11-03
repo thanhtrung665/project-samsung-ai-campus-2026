@@ -1,0 +1,192 @@
+{
+  "raw_rows": 6355,
+  "rows_mapped_to_item": 4108,
+  "rows_policy_general": 2247,
+  "menu_items": 106,
+  "items_with_price": 74,
+  "items_price_conflict": 1,
+  "price_conflicts": {
+    "Khoai tây chiên": {
+      "53900": 1,
+      "49000": 1
+    }
+  },
+  "items_price_mismatch_in_other_answers": 26,
+  "price_mismatch_detail": {
+    "Combo Kaki Salmon Chuka": {
+      "db": 215000,
+      "other_mentions": {
+        "236500": 2
+      }
+    },
+    "Combo Tuna Fuji": {
+      "db": 233000,
+      "other_mentions": {
+        "256300": 4
+      }
+    },
+    "Cơm Bò Xào": {
+      "db": 109000,
+      "other_mentions": {
+        "119900": 27
+      }
+    },
+    "Cơm Gà Chiên Giòn": {
+      "db": 109000,
+      "other_mentions": {
+        "119900": 22
+      }
+    },
+    "Cơm Gà Chiên Miso Cay": {
+      "db": 109000,
+      "other_mentions": {
+        "119900": 1
+      }
+    },
+    "Cơm Lươn": {
+      "db": 209000,
+      "other_mentions": {
+        "229900": 15
+      }
+    },
+    "Cơm Trộn Sansou Don Buri": {
+      "db": 169000,
+      "other_mentions": {
+        "108900": 9,
+        "185900": 3
+      }
+    },
+    "Cơm trắng": {
+      "db": 15000,
+      "other_mentions": {
+        "16500": 3
+      }
+    },
+    "Mì Ramen Xào Bò": {
+      "db": 108000,
+      "other_mentions": {
+        "108900": 3
+      }
+    },
+    "Mì Ramen Xào Hải Sản": {
+      "db": 89000,
+      "other_mentions": {
+        "97900": 6
+      }
+    },
+    "Mì Udon Bò Cay": {
+      "db": 109000,
+      "other_mentions": {
+        "119900": 2
+      }
+    },
+    "Mì Udon Xào Bò": {
+      "db": 129000,
+      "other_mentions": {
+        "141900": 16
+      }
+    },
+    "Mì Udon Xào Hải Sản": {
+      "db": 129000,
+      "other_mentions": {
+        "141900": 22
+      }
+    },
+    "Cơm Cuộn Cá Hồi Khè Tái": {
+      "db": 69000,
+      "other_mentions": {
+        "75900": 5,
+        "108900": 1
+      }
+    },
+    "Cơm Cuộn Cá Hồi Phô Mai Chiên Xù": {
+      "db": 69000,
+      "other_mentions": {
+        "75900": 1
+      }
+    },
+    "Cơm Cuộn Cá Hồi Sốt Mentai": {
+      "db": 79000,
+      "other_mentions": {
+        "86900": 1
+      }
+    },
+    "Cơm Cuộn Kiểu Cali": {
+      "db": 59000,
+      "other_mentions": {
+        "64900": 21
+      }
+    },
+    "Cơm Cuộn Lươn": {
+      "db": 95000,
+      "other_mentions": {
+        "152900": 8,
+        "104500": 1
+      }
+    },
+    "Cơm Cuộn Núi Phú Sĩ": {
+      "db": 69000,
+      "other_mentions": {
+        "75900": 1
+      }
+    },
+    "Cơm Cuộn Sò Điệp Phô Mai": {
+      "db": 109000,
+      "other_mentions": {
+        "108900": 3,
+        "119900": 6
+      }
+    },
+    "Cơm Cuộn Thanh Cua Cream Cheese": {
+      "db": 59000,
+      "other_mentions": {
+        "75900": 9
+      }
+    },
+    "Cá Hồi Cuộn Bacon Sốt Teri Yaki": {
+      "db": 209000,
+      "other_mentions": {
+        "141900": 4,
+        "229900": 2
+      }
+    },
+    "Cá Hồi Sốt Wasabi Salsa": {
+      "db": 148500,
+      "other_mentions": {
+        "137500": 1
+      }
+    },
+    "Sụn Gà Rang Muối": {
+      "db": 89000,
+      "other_mentions": {
+        "97900": 5,
+        "108900": 11
+      }
+    },
+    "Tôm Rang Muối": {
+      "db": 159000,
+      "other_mentions": {
+        "174900": 2
+      }
+    },
+    "Salad Cá Ngừ Sốt Kem Cay": {
+      "db": 109000,
+      "other_mentions": {
+        "108900": 6
+      }
+    }
+  },
+  "docs_menu": 106,
+  "docs_policy": 545,
+  "category_counts": {
+    "Món nóng / Khai vị": 21,
+    "Đồ uống": 16,
+    "Combo": 15,
+    "Maki / Cơm cuộn": 14,
+    "Salad": 13,
+    "Cơm / Mì": 12,
+    "Sashimi": 9,
+    "Tráng miệng": 4,
+    "Súp": 2
+  }
+}
