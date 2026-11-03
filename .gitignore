@@ -12,3 +12,5 @@ outputs/
 checkpoints/
 *.safetensors
 *.bin
+runs/
+kimochi-mvp*/

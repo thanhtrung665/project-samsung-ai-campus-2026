@@ -118,6 +118,7 @@ Trạng thái: ✅ xong · 🟡 đang làm / một phần · ⬜ chưa làm. **�
 | T16 | 09/11 | Hoàn thiện: mục lục tự động, DM hình/bảng, placeholder bìa, bảng phân công, tuyên bố AI, TLTK đủ, ≤ 45 trang | P0 | PDF hoàn chỉnh | 🟡 Phần 4–6 viết xong khung (34 trang); còn điền trang bìa, phân công, số liệu GPU |
 | T17 | 09/11 | Restart & Run All mọi notebook; đóng gói zip | P0 | zip đúng tên | 🟡 `code/make_submission.py` (kiểm tra rubric + zip) xong; chạy lần cuối 09/11 |
 | T18 | 10–11/11 | Đệm: soát rubric, Turnitin, nộp LMS trước 23:59 11/11 | P0 | Đã nộp | ⬜ |
+| T19 | 04/11 | Gộp notebook: thư mục `notebooks/`, NB1 (dữ liệu → sẵn sàng huấn luyện) + NB2 (LoRA/QLoRA → đánh giá → Hybrid-RAG → xuất mô hình → MVP) | P1 | NB1 chạy sạch; NB2 hợp lệ | ✅ 04/11 (NB2 chờ GPU) |
 
 **Thứ tự cắt khi trễ** (không cắt test_gold và hiệu chỉnh judge): 3 seed → 1 seed · Optuna 8 → 4 trial · bỏ text-to-SQL tự do
 (chỉ hàm tham số hóa) · MongoDB → JSON · M1–M4 → chỉ QLoRA cho cả 2 model + LoRA cho model tốt hơn · deploy Space → video.

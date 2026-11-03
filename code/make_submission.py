@@ -16,8 +16,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE = ["report_main.qmd", "report_main.pdf", "README.md", "requirements.txt", ".env.example", "code", "data", "demo", "images",
-           "results"]
+INCLUDE = ["report_main.qmd", "report_main.pdf", "README.md", "requirements.txt", ".env.example", "code", "notebooks", "data", "demo",
+           "images", "results"]
 EXCLUDE_DIRS = {"__pycache__", ".ipynb_checkpoints", ".git"}
 EXCLUDE_SUFFIX = {".pyc", ".db-journal", ".zip", ".safetensors", ".bin"}
 MAX_FILE_MB = 50
@@ -44,7 +44,7 @@ def files() -> list[Path]:
 
 
 def check(errors: list, warns: list):
-    for need in ["report_main.qmd", "report_main.pdf", "code", "data", "demo"]:
+    for need in ["report_main.qmd", "report_main.pdf", "code", "notebooks", "data", "demo"]:
         if not (ROOT / need).exists():
             errors.append(f"thiếu hạng mục bắt buộc: {need}")
     pdf = ROOT / "report_main.pdf"
@@ -98,7 +98,7 @@ def main():
     a = ap.parse_args()
     if a.run_notebooks:
         for n in CPU_NOTEBOOKS:
-            subprocess.run(["jupyter", "nbconvert", "--to", "notebook", "--execute", "--inplace", f"{n}.ipynb"], cwd=ROOT / "code", check=True)
+            subprocess.run(["jupyter", "nbconvert", "--to", "notebook", "--execute", "--inplace", f"{n}.ipynb"], cwd=ROOT / "notebooks" / "cpu", check=True)
     if a.render:
         subprocess.run(["quarto", "render", "report_main.qmd", "--to", "pdf"], cwd=ROOT, check=True)
     errors, warns = [], []

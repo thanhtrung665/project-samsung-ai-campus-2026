@@ -9,6 +9,7 @@ from pathlib import Path
 import nbformat as nbf
 
 HERE = Path(__file__).parent
+OUT = HERE.parent / 'notebooks' / 'kaggle'
 
 INSTALL = """%%capture
 !pip install -q "transformers==4.56.2" "trl==0.21.0" "peft==0.17.0" "bitsandbytes==0.47.0" "accelerate>=1.4" "datasets>=3.0" rank-bm25 optuna"""
@@ -272,5 +273,5 @@ if __name__ == "__main__":
         nb.cells = cells
         nb.metadata.update({"kernelspec": {"name": "python3", "display_name": "Python 3", "language": "python"},
                             "kaggle": {"accelerator": "nvidiaTeslaT4", "isInternetEnabled": True, "isGpuEnabled": True}})
-        nbf.write(nb, HERE / name)
+        nbf.write(nb, OUT / name)
         print("wrote", name)

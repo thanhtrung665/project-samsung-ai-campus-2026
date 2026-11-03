@@ -1,5 +1,7 @@
 # Chạy các notebook GPU trên Kaggle
 
+> Cách gọn nhất: chạy **`../NB2_finetune_rag_mvp.ipynb`** (gộp K1–K7). Các notebook dưới đây là từng bước tách riêng.
+
 | Notebook | Task | Thời gian ước tính (T4) | Đầu ra (`results/`) |
 |---|---|---|---|
 | `K1_rag_dense.ipynb` | T09 dense + reranker | 10–15 phút | `retrieval_val.csv`, `retrieval_test_synth.csv`, `retrieval_test_gold.csv` |

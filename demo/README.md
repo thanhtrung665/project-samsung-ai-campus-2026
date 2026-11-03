@@ -12,7 +12,7 @@ Mỗi phiên dùng bản sao DB riêng — đặt bàn / sửa giá không ghi v
 Ảnh giao diện ở chế độ `rule`: `images/demo_ui_rule.png`.
 
 ## Cách nộp (chọn một)
-1. **Video 2–3 phút (khuyến nghị — chắc chắn chạy):** chạy `code/kaggle/K7_demo.ipynb` trên Kaggle GPU → mở link `*.gradio.live`
+1. **Video 2–3 phút (khuyến nghị — chắc chắn chạy):** chạy `notebooks/NB2_finetune_rag_mvp.ipynb` §10 (hoặc `notebooks/kaggle/K7_demo.ipynb`) trên Kaggle GPU → mở link `*.gradio.live`
    → quay màn hình theo kịch bản dưới → đặt video / link vào `demo/`.
 2. **Hugging Face Space:** tạo Space Gradio, phần cứng **T4 small** (trả phí theo giờ; CPU miễn phí quá chậm cho mô hình 3B), upload
    `demo/`, `code/src/`, `data/kb/`, `data/kimochi.db`; biến môi trường như dòng `hf` ở trên; secret `HF_TOKEN` nếu adapter private.

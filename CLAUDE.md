@@ -59,8 +59,9 @@ data/
   kb/chunks.jsonl  đơn vị truy xuất RAG (≤ 600 ký tự) — dùng chung cho huấn luyện RAFT và lúc chạy
   splits/        v1: train/val/test_synth (+ test_gold/test_adv viết tay + CHECKSUMS.txt) — TẬP TEST CHÍNH THỨC
   splits_v2/     dữ liệu huấn luyện v2 (train/val + README dataset card) — chỉ train/val, không có test
-code/            01–05 notebook CPU · kaggle/K1–K5 notebook GPU · src/kimochi/ (build_kb, prepare_sft(_v2), eda, retriever,
-                 tools, agent, prompts, metrics, llm)
+notebooks/       NB1_data_pipeline (CPU) · NB2_finetune_rag_mvp (GPU) · cpu/01–05 · kaggle/K1–K7 (bước chi tiết)
+code/            src/kimochi/ (build_kb, prepare_sft(_v2), eda, retriever, tools, agent, agent_eval, prompts, metrics, llm,
+                 viz, manifest, report_tables) · script make_*_notebooks.py, make_submission.py, freeze_tests.py
 results/         (đích) *.csv / *.json kết quả, đọc vào .qmd bằng chunk Python ẩn
 images/          (đích) logo.png, fig_kien_truc.png, biểu đồ EDA/kết quả
 demo/            (đích) app Gradio/Streamlit + README link Space / video
@@ -77,7 +78,7 @@ demo/            (đích) app Gradio/Streamlit + README link Space / video
 
 ```bash
 quarto render report_main.qmd --to pdf      # cần quarto + xelatex + font Times New Roman
-jupyter nbconvert --to notebook --execute --inplace code/*.ipynb   # = Restart & Run All
+jupyter nbconvert --to notebook --execute --inplace notebooks/NB1_data_pipeline.ipynb   # = Restart & Run All
 ```
 
 **Tính tái lập:** mọi bước sinh dữ liệu phải cho cùng md5 giữa các lần chạy (không dùng thứ tự `set` chuỗi, uuid, thời gian).

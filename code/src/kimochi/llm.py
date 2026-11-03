@@ -34,7 +34,8 @@ def bnb_config():
 
 
 def load(model_key: str, quant: str = "fp16", adapter: str | None = None, for_training: bool = False):
-    """quant: 'fp16' (LoRA) hoặc 'nf4' (QLoRA)."""
+    """quant: 'fp16' (LoRA 16-bit) · 'nf4' (QLoRA 4-bit) · 'int8' (QLoRA 8-bit, LLM.int8 — tùy chọn).
+    model_key: 'qwen' / 'llama' hoặc đường dẫn / HF repo của mô hình đã gộp (bản MVP)."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
     torch = _torch()
     name = MODELS.get(model_key, model_key)
@@ -51,6 +52,9 @@ def load(model_key: str, quant: str = "fp16", adapter: str | None = None, for_tr
     kw = {"torch_dtype": torch.float16, "device_map": {"": 0}}
     if quant == "nf4":
         kw["quantization_config"] = bnb_config()
+    elif quant == "int8":
+        from transformers import BitsAndBytesConfig
+        kw["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
     model = AutoModelForCausalLM.from_pretrained(name, **kw)
     if adapter:
         from peft import PeftModel
@@ -123,7 +127,7 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
 
     set_seed(seed)
     model, tok, name = load(model_key, quant, for_training=True)
-    if quant == "nf4":
+    if quant in ("nf4", "int8"):
         model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
     else:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
@@ -139,7 +143,7 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
         output_dir=out_dir, seed=seed, learning_rate=lr, num_train_epochs=epochs, max_steps=max_steps,
         per_device_train_batch_size=per_device_bs, per_device_eval_batch_size=8, gradient_accumulation_steps=grad_accum,
         lr_scheduler_type="cosine", warmup_ratio=0.03, weight_decay=0.0, fp16=True, bf16=False,
-        optim="paged_adamw_8bit" if quant == "nf4" else "adamw_torch",
+        optim="paged_adamw_8bit" if quant in ("nf4", "int8") else "adamw_torch",
         logging_steps=10, eval_strategy="steps", eval_steps=eval_steps, save_strategy="steps", save_steps=eval_steps,
         save_total_limit=1, load_best_model_at_end=True, metric_for_best_model="eval_loss", greater_is_better=False,
         max_length=max_len, completion_only_loss=True, packing=False, report_to=report_to, gradient_checkpointing=False,
@@ -174,3 +178,28 @@ def push_adapter(local_dir: str, repo_id: str, private: bool = True):
     api.create_repo(repo_id, private=private, exist_ok=True)
     api.upload_folder(folder_path=local_dir, repo_id=repo_id)
     return f"https://huggingface.co/{repo_id}"
+
+
+def export_merged(model_key: str, adapter: str, out_dir: str) -> dict:
+    """Xuất mô hình hoàn chỉnh cho MVP: nạp mô hình nền fp16 + adapter (LoRA hoặc QLoRA) → merge_and_unload → lưu safetensors.
+    Adapter QLoRA được gộp vào trọng số fp16 (không gộp vào trọng số 4-bit để tránh sai số lượng tử kép).
+    Khi chạy MVP có thể nạp lại ở nf4 để tiết kiệm VRAM: load(out_dir, 'nf4')."""
+    torch = _torch()
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    name = MODELS.get(model_key, model_key)
+    try:
+        tok = AutoTokenizer.from_pretrained(name)
+    except OSError:
+        name = LLAMA_MIRROR
+        tok = AutoTokenizer.from_pretrained(name)
+    base = AutoModelForCausalLM.from_pretrained(name, torch_dtype=torch.float16, device_map={"": 0})
+    merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
+    merged.save_pretrained(out_dir, safe_serialization=True, max_shard_size="2GB")
+    tok.save_pretrained(out_dir)
+    size_gb = sum(f.stat().st_size for f in Path(out_dir).glob("*.safetensors")) / 2**30
+    info = {"base": name, "adapter": adapter, "dtype": "float16", "size_gb": round(size_gb, 2), "path": out_dir}
+    Path(out_dir, "kimochi_export.json").write_text(json.dumps(info, indent=1))
+    del merged, base
+    free()
+    return info

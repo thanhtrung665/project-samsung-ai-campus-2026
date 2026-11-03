@@ -2,6 +2,16 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-04 — T19 gộp notebook
+- Thư mục `notebooks/`: **NB1_data_pipeline** (CPU, 25 ô, chạy sạch 46 s: nạp → KB → chất lượng → nhãn → split → EDA → dữ liệu v2 →
+  kiểm tra sẵn sàng → `data/MANIFEST.json`) và **NB2_finetune_rag_mvp** (GPU Kaggle, 38 ô: nhận dữ liệu kiểm manifest → Optuna tùy
+  chọn + baseline → LoRA 16-bit / QLoRA 4-bit (+8-bit tùy chọn) × Qwen/LLaMA → đánh giá test + CI + VRAM↔chất lượng + intent + câu
+  nhiễu + ca lỗi → demo nhanh → Hybrid-RAG ablation → gốc/+RAG/FT/+RAG/+Agent, định tuyến, kịch bản, judge → xuất mô hình gộp
+  (`merge_and_unload`, kiểm nạp lại NF4) + gói MVP → demo MVP). Tự bỏ qua bước đã xong để chạy nhiều phiên.
+- Chuyển `code/0x_*.ipynb` → `notebooks/cpu/`, `code/kaggle/K*` → `notebooks/kaggle/`; notebook tự tìm thư mục gốc repo.
+- Module mới `viz.py` (biểu đồ kết quả), `manifest.py`; `llm.py` thêm QLoRA 8-bit (`int8`) và `export_merged`; `bootstrap_ci` /
+  `paired_bootstrap` an toàn khi không có mẫu. NB2 đã chạy thử các ô nhận dữ liệu trên CPU; phần GPU chưa chạy.
+
 ### 2026-11-03 (khuya) — Phần B: T14, T12, khung Phần 4–6, T16, T17
 - **T14** `demo/app.py` Gradio: hội thoại, vết công cụ, đoạn RAG, công tắc RAG / công cụ, tab What-if đổi giá (đã kiểm: đổi Cơm Lươn
   209.000 → 250.000 thì chatbot trả lời giá mới, DB gốc không đổi); backend `hf` (GPU) và `rule` (thử giao diện, không LLM).
