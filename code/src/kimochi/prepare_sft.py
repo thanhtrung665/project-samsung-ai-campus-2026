@@ -45,7 +45,7 @@ INTENT_RULES = [  # thứ tự = độ ưu tiên
                      r"shopeefood|grab|voucher|thẻ thành viên|tích điểm"),
     ("allergy_diet", r"dị ứng|trẻ em|trẻ nhỏ|bé|bầu|ăn chay|món chay|thuần chay|không ăn|lưu ý khi dùng|người già|"
                      r"ăn kiêng|tanh|độ chín|sống"),
-    ("price_query", r"giá|bao nhiêu tiền|nhiêu tiền|bao nhiêu|mấy k|\bk\b"),
+    ("price_query", r"\bgiá\b|bao nhiêu tiền|nhiêu tiền|bao nhiêu|mấy k\b|\d+\s*k\b|\bgia\b|bao nhieu"),
     ("recommendation", r"gợi ý|nên ăn|nên gọi|phù hợp|sinh nhật|nhóm|gia đình|cặp đôi|hẹn hò|dịp|tiệc|bán chạy|"
                        r"ngon nhất|best seller|combo cho|mấy người|liên hoan|kỷ niệm"),
     ("chitchat", r"^(xin chào|chào|hello|hi|cảm ơn|thanks|ok)\b"),
@@ -56,7 +56,8 @@ TEEN = re.compile(r"\b(k|ko|hok|dc|đc|bn|bnh|ns|mn|j|z|v|ak|ạk|nha|nhaa|shop|
 def intent_of(domain: str, query: str) -> str:
     d, q = domain.lower(), query.lower()
     for name, pat in INTENT_RULES:
-        if re.search(pat, d) or re.search(pat, q):
+        # domain kiểu "Giá & Hương vị: X" chứa cả câu hỏi không về giá → intent giá chỉ xét trên câu hỏi
+        if re.search(pat, q) or (name != "price_query" and re.search(pat, d)):
             return name
     return "menu_info"
 

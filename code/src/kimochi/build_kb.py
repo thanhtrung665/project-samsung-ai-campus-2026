@@ -252,6 +252,19 @@ def build_db(menu: pd.DataFrame) -> None:
     con.close()
 
 
+def cross_check_prices(df: pd.DataFrame, menu: pd.DataFrame) -> dict:
+    """Đối chiếu giá trong DB với giá nhắc kèm tên món ở MỌI câu trả lời khác (vd câu gợi ý combo: "Tôm Rang Muối (174.900 VNĐ)")."""
+    resp = list(dict.fromkeys(df["responses"]))
+    out = {}
+    for r in menu.dropna(subset=["price_vnd"]).itertuples():
+        pat = re.compile(re.escape(r.name) + r"\s*\(?\s*(\d{1,3}(?:[.,]\d{3})+)\s*(?:vnđ|vnd|đ)", re.I)
+        seen = Counter(int(re.sub(r"[.,]", "", m)) for t in resp for m in pat.findall(t))
+        other = {p: c for p, c in seen.items() if p != int(r.price_vnd)}
+        if other:
+            out[r.name] = {"db": int(r.price_vnd), "other_mentions": other}
+    return out
+
+
 def main() -> dict:
     KB_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(exist_ok=True)
@@ -272,6 +285,8 @@ def main() -> dict:
         "items_with_price": int(menu["price_vnd"].notna().sum()),
         "items_price_conflict": len(conflicts),
         "price_conflicts": conflicts,
+        "items_price_mismatch_in_other_answers": len(xc := cross_check_prices(df, menu)),
+        "price_mismatch_detail": xc,
         "docs_menu": sum(d["type"] == "menu" for d in docs),
         "docs_policy": sum(d["type"] == "policy" for d in docs),
         "category_counts": menu["category"].value_counts().to_dict(),

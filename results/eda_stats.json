@@ -5,20 +5,20 @@
       "reservation_create": 0.006,
       "store_info": 0.018,
       "policy_promo": 0.035,
+      "price_query": 0.077,
       "allergy_diet": 0.125,
-      "recommendation": 0.146,
-      "price_query": 0.149,
-      "menu_info": 0.517
+      "recommendation": 0.138,
+      "menu_info": 0.598
     },
-    "max_abs_share_gap_train_test": 0.023836556526511177
+    "max_abs_share_gap_train_test": 0.0050963771857623075
   },
   "lengths": {
     "q_mean": 9.482140047206924,
     "q_p95": 16.0,
     "q_skew": 2.121931696373024,
-    "a_mean": 38.84736757365964,
+    "a_mean": 38.88374336710082,
     "a_p95": 72.0,
-    "a_skew": 1.2640818922930888,
+    "a_skew": 1.256368435362147,
     "a_max": 122
   },
   "noise": {
@@ -31,14 +31,14 @@
     "share_groups_ge3": 0.9932268988872762
   },
   "leakage": {
-    "kept_cos_mean": 0.7605913567963735,
-    "kept_cos_max": 0.9199382828237244
+    "kept_cos_mean": 0.7550864508147507,
+    "kept_cos_max": 0.9196529303473772
   },
   "funnel": {
     "Mẫu gốc": 6355,
     "Gán được món cụ thể": 4108,
     "Câu trả lời khác nhau (nhóm)": 2067,
-    "Giữ sau kiểm rò rỉ": 6211
+    "Giữ sau kiểm rò rỉ": 6219
   },
   "menu": {
     "priced": 74,

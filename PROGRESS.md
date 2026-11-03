@@ -2,6 +2,18 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-03 (tối) — Notebook Kaggle cho T09–T13; sửa nhãn intent; phát hiện giá trộn VAT
+- `code/kaggle/K1–K5` + `README.md` (hướng dẫn upload dataset, secrets, thứ tự chạy). Module mới `kaggle_env.py`, `prompts.py`,
+  `metrics.py` (ROUGE-L, fact-EM giá, bịa giá, từ chối, bootstrap, judge Gemini), `llm.py` (nạp model, sinh theo lô, train
+  LoRA fp16 / QLoRA nf4 với TRL 0.21 prompt/completion → loss chỉ trên câu trả lời). Phần CPU đã kiểm thử; **chưa chạy GPU**.
+- **Sửa lỗi gán intent:** luật giá đọc chữ "Giá" trong Domain ("Giá & Hương vị: X") nên gán nhầm câu "ăn kèm gì" là
+  price_query; `\bk\b` khớp teen code "k" (= không). Sau sửa: menu_info 60%, recommendation 14%, allergy 12,5%, price 8%;
+  split 5.085 / 557 / 577, loại 136 câu rò rỉ. Đã chạy lại notebook 02–04 và cập nhật số trong Phần 3.
+  Retrieval test_synth (339 câu): BM25 + lọc R@1 0,917 / R@5 0,962 / MRR 0,935.
+- **Phát hiện chất lượng dữ liệu:** 26/74 món có giá mâu thuẫn giữa các câu trả lời; 16 món chênh đúng VAT 10%
+  (109.000 ↔ 119.900), 10 món mâu thuẫn thật (Cơm Cuộn Lươn 95.000 ↔ 152.900). Đã đưa vào Phần 3 như lập luận cho thiết
+  kế "giá chỉ đọc từ SQL". Cần nhà hàng xác nhận giá trước/sau VAT.
+
 ### 2026-11-03 (chiều) — T04, T05, T07 (một phần), T08, T09 (phần sparse)
 - **T04** cấu trúc repo `code/ results/ images/ demo/`, `requirements.txt`, `.gitignore`, `.env.example`. Render PDF được
   (local dùng Liberation Serif thay Times New Roman vì môi trường không có font MS: `-M mainfont="Liberation Serif"`).
