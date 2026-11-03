@@ -117,7 +117,7 @@ crossref:
 
 Lời đầu tiên, tôi xin gửi lời cảm ơn chân thành đến [Học hàm, học vị, họ tên giảng viên] đã tận tình hướng dẫn, góp ý và định hướng trong suốt quá trình thực hiện tiểu luận. Tôi cũng xin cảm ơn Ban quản lý nhà hàng **Kimochi Sushi** đã cung cấp tư liệu thực đơn, thông tin vận hành và các mẫu hội thoại chăm sóc khách hàng trên fanpage, làm nền tảng cho dữ liệu của nghiên cứu.
 
-**Tuyên bố sử dụng AI.** Trong quá trình thực hiện, tôi có sử dụng các công cụ trí tuệ nhân tạo tạo sinh (Claude, ChatGPT, Gemini) với vai trò trợ lý: gợi ý cấu trúc kế hoạch nghiên cứu, hỗ trợ tra cứu tài liệu, rà soát cú pháp mã nguồn và sinh biến thể câu hỏi trong giai đoạn mở rộng dữ liệu. Toàn bộ nội dung học thuật, số liệu thực nghiệm, phân tích và kết luận trong báo cáo đều do tôi tự kiểm chứng, chỉnh sửa và chịu trách nhiệm. Các mẫu dữ liệu do AI sinh ra đều được thẩm định thủ công trước khi đưa vào huấn luyện, như trình bày tại Phần 3.
+**Tuyên bố sử dụng AI.** Trong quá trình thực hiện, tôi có sử dụng các công cụ trí tuệ nhân tạo tạo sinh (Claude, Claude Code, ChatGPT, Gemini) với vai trò trợ lý. Cụ thể, **Claude Code** (trợ lý lập trình của Anthropic) hỗ trợ viết mã nguồn xử lý dữ liệu, xây dựng kho tri thức, các notebook huấn luyện – đánh giá, ứng dụng mẫu và soạn bản nháp Phần 3–6, dưới sự kiểm tra, chỉnh sửa và chịu trách nhiệm của tôi; **Gemini** được dùng làm mô hình chấm điểm (LLM-as-judge) đã hiệu chỉnh với người chấm. Ngoài ra, các công cụ trên được dùng để: gợi ý cấu trúc kế hoạch nghiên cứu, hỗ trợ tra cứu tài liệu, rà soát cú pháp mã nguồn và sinh biến thể câu hỏi trong giai đoạn mở rộng dữ liệu. Toàn bộ nội dung học thuật, số liệu thực nghiệm, phân tích và kết luận trong báo cáo đều do tôi tự kiểm chứng, chỉnh sửa và chịu trách nhiệm. Các mẫu dữ liệu do AI sinh ra đều được thẩm định thủ công trước khi đưa vào huấn luyện, như trình bày tại Phần 3.
 
 ```{=latex}
 \clearpage
@@ -515,6 +515,165 @@ Các phát hiện ở mục EDA cho thấy bộ dữ liệu kế thừa **chưa 
 5. **Đa dạng hóa lời nhắc hệ thống:** ba biến thể system prompt để tránh mô hình phụ thuộc vào một cách diễn đạt duy nhất.
 
 Kết quả gồm **4.980 hội thoại huấn luyện và 580 hội thoại kiểm định**, trong đó 433 hội thoại nhiều lượt. Khi huấn luyện, mỗi lượt trả lời của trợ lý được tách thành một mẫu riêng, với toàn bộ hội thoại trước đó làm ngữ cảnh và hàm mất mát chỉ tính trên lượt trả lời đó. Cách làm này bảo đảm mô hình không học các lượt của khách hay nội dung trả về từ công cụ. Phép chia tập kế thừa nguyên `group_id` của bộ dữ liệu gốc, và **tập kiểm tra được giữ nguyên** để so sánh công bằng hai phiên bản dữ liệu; một thí nghiệm đối chứng huấn luyện cùng cấu hình trên dữ liệu v1 và v2 được trình bày ở Phần 4. Toàn bộ quy trình và hạn chế được mô tả trong thẻ dữ liệu (dataset card) đi kèm `data/splits_v2/README.md`.
+
+
+```{python}
+#| include: false
+import sys
+sys.path.insert(0, "code/src")
+from IPython.display import Markdown
+from kimochi import report_tables as T
+```
+
+# Thiết kế, huấn luyện và tối ưu mô hình
+
+*Phần này áp dụng giai đoạn Mô hình hóa của CRISP-DM. Mọi thí nghiệm dùng cùng dữ liệu, cùng số epoch, cùng lời nhắc đánh giá và cùng hạt giống ngẫu nhiên (seed = 42); chỉ thay đổi mô hình nền và kiểu lượng tử hóa. Mã nguồn: `code/kaggle/K2–K4`, chạy trên GPU NVIDIA T4 16 GB của Kaggle. Các ô ghi TBD là kết quả chưa có tại thời điểm soạn bản thảo và được điền tự động từ thư mục `results/` khi biên dịch lại báo cáo.*
+
+## Mô hình cơ sở
+
+Ba hệ thống cơ sở được xây dựng cho mỗi mô hình nền (Qwen2.5-3B-Instruct và LLaMA-3.2-3B-Instruct, trọng số fp16, sinh tham lam): **B0** – chỉ dùng lời nhắc hệ thống (zero-shot); **B1** – thêm năm ví dụ mẫu cố định, mỗi ý định một ví dụ, dùng chung cho cả hai mô hình (few-shot); **B2** – thêm ba đoạn tài liệu do bộ truy xuất trả về (RAG không tinh chỉnh). B2 tách riêng tác động của truy xuất, giúp trả lời câu hỏi nghiên cứu RQ3 về giá trị gia tăng của tinh chỉnh so với RAG đơn thuần. Kết quả trên tập kiểm tra tổng hợp được trình bày tại @tbl-baseline.
+
+```{python}
+#| label: tbl-baseline
+#| tbl-cap: "Kết quả các hệ thống cơ sở trên tập kiểm tra tổng hợp (577 câu)"
+Markdown(T.baseline_table())
+```
+
+```{python}
+#| output: asis
+print(T.status_note(["baseline.csv"]))
+```
+
+## Huấn luyện các mô hình nâng cao
+
+**Ma trận thí nghiệm.** Bốn mô hình nâng cao được huấn luyện theo ma trận {Qwen2.5-3B, LLaMA-3.2-3B} × {LoRA fp16, QLoRA NF4}. Cấu hình chung: bộ điều hợp LoRA gắn vào toàn bộ bảy lớp tuyến tính của khối Transformer (`q, k, v, o, gate, up, down_proj`), $\alpha = 2r$, dropout 0,05; lịch học cosine với 3% khởi động; 2 epoch với dừng sớm theo val loss (kiên nhẫn 3 lần đánh giá); kích thước lô hiệu dụng 16 (4 × tích lũy gradient 4); độ dài tối đa 1.024 token theo kết quả EDA; hàm mất mát **chỉ tính trên lượt trả lời của trợ lý**. QLoRA lưu trọng số nền ở định dạng NF4 với lượng tử hóa kép, tính toán fp16 và bộ tối ưu `paged_adamw_8bit`; LoRA giữ trọng số nền fp16 với gradient checkpointing. Do GPU T4 không hỗ trợ bf16, tham số của bộ điều hợp được giữ ở fp32 để tránh lỗi tràn số khi huấn luyện độ chính xác hỗn hợp. Kết quả về tài nguyên và hàm mất mát được trình bày tại @tbl-matrix.
+
+```{python}
+#| label: tbl-matrix
+#| tbl-cap: "Ma trận huấn luyện LoRA / QLoRA trên dữ liệu v2 – tài nguyên và val loss"
+Markdown(T.train_matrix_table())
+```
+
+**Thay thế kiểm định chéo K-Fold.** Kiểm định chéo K-Fold đòi hỏi huấn luyện lại K lần, với mô hình 3 tỷ tham số trên GPU miễn phí là không khả thi về chi phí. Nghiên cứu thay thế bằng hai kỹ thuật có căn cứ thống kê tương đương: (i) chạy lặp với nhiều hạt giống ngẫu nhiên khi tài nguyên cho phép và báo cáo trung bình ± độ lệch chuẩn; (ii) **bootstrap ghép cặp 1.000 lần** trên tập kiểm tra để tính khoảng tin cậy 95% cho mọi chênh lệch giữa hai hệ thống (Phần 5). Tập kiểm định được chia theo nhóm câu trả lời nên vẫn bảo đảm tính độc lập như một fold kiểm định.
+
+## Tinh chỉnh siêu tham số và kiểm soát quá khớp
+
+**Tối ưu Bayes bằng Optuna.** Hai siêu tham số nhạy nhất của LoRA là hạng $r$ và tốc độ học được dò tìm bằng bộ lấy mẫu TPE của Optuna trên ô rẻ nhất (Qwen QLoRA), với 30% dữ liệu huấn luyện và tối đa 120 bước mỗi lần thử; bộ cắt tỉa MedianPruner dừng sớm các lần thử có val loss kém hơn trung vị. Cấu hình tốt nhất (@tbl-optuna) được áp dụng cho cả bốn ô của ma trận để bảo đảm so sánh công bằng.
+
+```{python}
+#| label: tbl-optuna
+#| tbl-cap: "Không gian tìm kiếm và kết quả tối ưu siêu tham số bằng Optuna"
+Markdown(T.optuna_table())
+```
+
+**Đường cong học.** Hai loại đường cong được dùng để phát hiện quá khớp và chưa khớp: (a) train loss và val loss theo số bước – val loss ngừng giảm trong khi train loss tiếp tục giảm là dấu hiệu quá khớp, và điểm dừng sớm được chọn tại val loss nhỏ nhất; (b) val loss theo cỡ dữ liệu huấn luyện 25%, 50% và 100% (lấy mẫu theo nhóm để giữ tính chống rò rỉ), trả lời câu hỏi kinh doanh *"có đáng đầu tư tạo thêm dữ liệu hay không"*: nếu đường cong còn dốc ở 100%, bổ sung dữ liệu vẫn mang lại lợi ích.
+
+```{python}
+#| output: asis
+T.figure_or_tbd("loss_curves.png", "Train loss và val loss theo bước huấn luyện của bốn ô ma trận")
+T.figure_or_tbd("learning_curve.png", "Val loss theo tỷ lệ dữ liệu huấn luyện của mô hình tốt nhất", "60%")
+```
+
+**Thí nghiệm đối chứng dữ liệu v1 và v2.** Để chứng minh tác dụng của quy trình xây dựng dữ liệu ở Phần 3, mô hình Qwen QLoRA được huấn luyện lặp lại với cùng cấu hình trên dữ liệu v1 (chỉ hỏi – đáp, không ngữ cảnh) và so sánh với dữ liệu v2 (@tbl-data-ablation). Chỉ số quyết định là **tỷ lệ bịa giá** và **tỷ lệ từ chối đúng** ở chế độ Agent, không phải val loss, vì hai tập kiểm định có phân phối khác nhau.
+
+```{python}
+#| label: tbl-data-ablation
+#| tbl-cap: "Đối chứng huấn luyện trên dữ liệu v1 và v2 (Qwen QLoRA, cùng siêu tham số)"
+Markdown(T.data_ablation_table())
+```
+
+## Tối ưu bộ truy xuất Hybrid RAG
+
+Bộ truy xuất được đánh giá trên 345 câu hỏi kiểm tra có gắn với một món cụ thể, với tài liệu đúng là tài liệu của món đó (@tbl-retrieval). Kết quả cho thấy BM25 trên văn bản đã bỏ dấu và có bổ sung cặp từ (bigram) là thành phần mạnh nhất: Recall@5 đạt 0,965, nghĩa là gần như mọi câu hỏi đều có tài liệu đúng trong năm kết quả đầu. Bước **lọc theo tên món** – đưa các đoạn của món được nhắc tên trong câu hỏi lên đầu – nâng Recall@1 từ 0,907 lên 0,928 mà không làm giảm Recall@5. Ngược lại, trộn BM25 với TF-IDF n-gram ký tự bằng RRF *làm giảm* Recall@1 (0,887), vì TF-IDF ký tự yếu hơn hẳn và kéo các tài liệu sai lên trên; kết quả này cho thấy RRF chỉ có lợi khi các thành phần có chất lượng tương đương, và vai trò của truy xuất ngữ nghĩa (dense) cần được đo trực tiếp thay vì mặc định là có lợi. Trên nhóm câu hỏi nhiễu (không dấu, viết tắt), Recall@5 chỉ giảm nhẹ (0,952), chứng tỏ việc bỏ dấu khi đánh chỉ mục là hiệu quả. Cấu hình BM25 + lọc tên món được chọn cho hệ thống; các cấu hình dense và reranker được bổ sung từ notebook K1.
+
+```{python}
+#| label: tbl-retrieval
+#| tbl-cap: "Ablation bộ truy xuất trên tập kiểm tra tổng hợp (345 câu có gắn món)"
+Markdown(T.retrieval_table())
+```
+
+# Đánh giá chuyên sâu, giải thích mô hình và đạo đức AI
+
+## Chỉ số đánh giá và kết quả
+
+**Lựa chọn chỉ số.** Bài toán là sinh văn bản có gọi công cụ nên các chỉ số phân loại thông thường được thay bằng một bộ chỉ số gắn với rủi ro kinh doanh: **(1) Fact-EM giá** – tỷ lệ câu hỏi giá được trả lời đúng con số trong cơ sở dữ liệu và không kèm giá sai; **(2) Tỷ lệ bịa giá** – tỷ lệ câu trả lời đưa ra giá cho món chưa có giá trong cơ sở dữ liệu; **(3) Tỷ lệ từ chối**; **(4) ROUGE-L** so với câu trả lời chuẩn (để so sánh với phiên bản trước); **(5) điểm LLM-as-judge** thang 1–5 do mô hình Gemini chấm, được hiệu chỉnh bằng tương quan Spearman với khoảng 50 mẫu do người chấm \[23\]; **(6) độ trễ p95**. **Fact-EM giá và tỷ lệ bịa giá là chỉ số chính**, tương tự cách ưu tiên Recall trong bài toán phát hiện gian lận: một câu trả lời sai giá gây thiệt hại trực tiếp (khách khiếu nại, nhà hàng phải chịu chênh lệch) lớn hơn nhiều một câu trả lời kém trôi chảy, nên ROUGE-L chỉ là chỉ số phụ. Tương tự, với câu hỏi dị ứng, một lần từ chối thừa (chuyển nhân viên) rẻ hơn nhiều so với một lần trả lời sai.
+
+```{python}
+#| label: tbl-final
+#| tbl-cap: "Kết quả đánh giá các mô hình tinh chỉnh (tập kiểm tra chính)"
+Markdown(T.final_eval_table())
+```
+
+```{python}
+#| output: asis
+print(T.status_note(["finetuned_eval.csv", "judge_scores.csv"]))
+```
+
+**Đánh giá Agent và ma trận nhầm lẫn theo chi phí kinh doanh.** Với Agent, quyết định quan trọng nhất là *chọn đúng công cụ*. Mỗi câu hỏi được gán công cụ kỳ vọng theo ý định (hỏi giá → `get_menu_item`, hỏi chi nhánh → `get_branch_info`, đặt bàn → `check_availability`, khiếu nại → `handoff_to_staff`, còn lại → trả lời từ tài liệu) và so với công cụ đầu tiên Agent thực sự gọi. Các loại nhầm lẫn không có chi phí như nhau; @tbl-cost gán trọng số chi phí tương đối (giả định của nhóm) cho từng loại, từ đó tính **chi phí nhầm lẫn trên 100 câu hỏi** – chỉ số tổng hợp thay cho độ chính xác thuần túy. Kịch bản đặt bàn nhiều lượt được chấm đạt khi trạng thái cơ sở dữ liệu sau hội thoại đúng với kỳ vọng **và** lệnh ghi chỉ được gọi sau lượt khách xác nhận (@tbl-agent).
+
+```{python}
+#| label: tbl-cost
+#| tbl-cap: "Chi phí kinh doanh tương đối của các loại nhầm lẫn khi định tuyến công cụ (giả định)"
+Markdown(T.cost_table())
+```
+
+```{python}
+#| label: tbl-agent
+#| tbl-cap: "Kết quả đánh giá Agent: kịch bản đặt bàn nhiều lượt và định tuyến công cụ"
+Markdown(T.agent_table())
+```
+
+```{python}
+#| output: asis
+T.figure_or_tbd("tool_routing_confusion.png", "Ma trận nhầm lẫn định tuyến công cụ của Agent", "65%")
+```
+
+**Phân tích lỗi.** Mười ca có điểm thấp nhất của hệ thống tốt nhất được trích tự động (`results/error_cases.csv`) và phân nhóm theo nguyên nhân: truy xuất sai tài liệu, mô hình bỏ qua ngữ cảnh, gọi sai công cụ, hoặc câu trả lời chuẩn trong dữ liệu gốc có lỗi.
+
+## Minh bạch hóa và giải thích mô hình
+
+Các kỹ thuật giải thích dựa trên đặc trưng như SHAP được thiết kế cho mô hình dạng bảng; với hệ thống LLM kết hợp truy xuất và công cụ, nghiên cứu áp dụng ba cơ chế giải thích ở mức quyết định:
+
+- **Truy vết nguồn.** Mọi đoạn tài liệu đưa vào ngữ cảnh mang mã định danh (`[doc_menu_M033#c3]`), mọi con số giá đi kèm lời gọi công cụ và kết quả trả về từ cơ sở dữ liệu. Giao diện sản phẩm hiển thị trực tiếp vết này (Phần 6), cho phép nhân viên kiểm tra *vì sao* chatbot trả lời như vậy.
+- **Phân rã điểm truy xuất.** Điểm BM25 là tổng đóng góp của từng token nên có thể giải thích chính xác, tương tự giá trị SHAP của một mô hình cộng tính. @tbl-xai phân rã điểm của đoạn được xếp hạng nhất cho câu hỏi không dấu *"com cuon kieu cali bao nhieu tien"*: tên món riêng (`cali`) và các cặp từ (`cuon_kieu`, `kieu_cali`) đóng góp phần lớn điểm, còn các từ chung như "bao nhieu tien" gần như không đóng góp do xuất hiện trong rất nhiều tài liệu (IDF thấp). Điều này giải thích vì sao bổ sung cặp từ và bỏ dấu giúp truy xuất đúng cả với câu hỏi viết không dấu.
+- **Loại bỏ ngữ cảnh (leave-one-out) và ablation.** Với mỗi câu trả lời, lần lượt bỏ từng đoạn ngữ cảnh rồi sinh lại; đoạn nào khi bỏ làm câu trả lời thay đổi là đoạn mô hình thực sự dựa vào. Các thí nghiệm ablation ở Phần 4 (bật/tắt RAG, dữ liệu v1/v2, bật/tắt công cụ) đóng vai trò giải thích ở mức hệ thống.
+
+```{python}
+#| label: tbl-xai
+#| tbl-cap: "Phân rã điểm BM25 của đoạn tài liệu hạng nhất cho câu hỏi “com cuon kieu cali bao nhieu tien”"
+tbl, ex = T.bm25_explain_table()
+Markdown(tbl)
+```
+
+## Đạo đức AI, thiên lệch và rủi ro vận hành
+
+- **An toàn thực phẩm và dị ứng.** Đây là rủi ro nghiêm trọng nhất: một câu trả lời sai về thành phần có thể gây hại sức khỏe. Thông tin dị ứng trong cơ sở dữ liệu hiện được suy luận tự động và gắn cờ *chưa xác nhận*; chatbot luôn kèm lời khuyến nghị xác nhận lại với nhân viên, và dữ liệu huấn luyện dạy mô hình từ chối khi tài liệu không đủ căn cứ.
+- **Thiên lệch thuật toán.** Nhóm khách nhắn tin không dấu, viết tắt (44% câu hỏi) có nguy cơ được phục vụ kém hơn. Mọi chỉ số được báo cáo riêng cho nhóm câu hỏi nhiễu; với bộ truy xuất, chênh lệch Recall@5 giữa nhóm nhiễu và toàn bộ chỉ 1,3 điểm phần trăm. Dữ liệu cũng lệch về câu hỏi thực đơn, nên các tác vụ giao dịch được bổ sung mẫu ở bộ dữ liệu v2.
+- **Quyền riêng tư.** Chatbot chỉ thu thập tên và số điện thoại khi đặt bàn, chỉ ghi qua hàm có tham số hóa; công cụ không cho phép truy vấn danh sách đặt bàn của khách khác, và yêu cầu kiểu *"liệt kê toàn bộ đơn đặt bàn"* nằm trong dữ liệu từ chối. Dữ liệu đặt bàn dùng trong nghiên cứu là mô phỏng.
+- **Tấn công prompt injection.** Dữ liệu huấn luyện có các mẫu tấn công (yêu cầu bỏ qua hướng dẫn, đòi giảm giá 100%, đòi xem lời nhắc hệ thống) với đáp án từ chối; quan trọng hơn, giá và quyền ghi nằm ở tầng công cụ chứ không ở mô hình, nên kể cả khi mô hình bị thao túng, nó cũng không thể tự thay đổi giá hay dữ liệu.
+- **Con người trong vòng lặp.** Ba điểm can thiệp của con người được thiết kế sẵn: (i) khách luôn được hỏi xác nhận trước khi đặt bàn; (ii) khiếu nại, câu hỏi thiếu thông tin và món chưa có giá được chuyển cho nhân viên; (iii) quản lý nhà hàng là người duy nhất cập nhật giá và thông tin dị ứng trong cơ sở dữ liệu.
+
+# Sản phẩm mẫu, khả năng ứng dụng và hướng phát triển
+
+## Thiết kế giao diện ứng dụng mẫu
+
+Sản phẩm mẫu được xây dựng bằng **Gradio** (`demo/app.py`) theo kiến trúc tại @fig-architecture, gồm hai tab. Tab *Trò chuyện* cho phép khách nhắn tin tự do (có dấu hoặc không dấu); bên phải màn hình hiển thị **vết gọi công cụ** (tên công cụ, tham số, kết quả truy vấn cơ sở dữ liệu), **các đoạn tài liệu RAG** đã dùng và độ trễ, cùng hai công tắc bật/tắt RAG và công cụ để trình diễn tác động của từng thành phần. Tab *What-if* cho phép đổi giá một món trong bản sao cơ sở dữ liệu của phiên rồi hỏi lại – chatbot trả lời ngay theo giá mới mà không cần huấn luyện lại, minh chứng trực quan cho nguyên tắc tách dữ kiện khỏi trọng số mô hình. Mỗi phiên làm việc dùng một bản sao cơ sở dữ liệu riêng nên thao tác đặt bàn và sửa giá không ảnh hưởng dữ liệu gốc.
+
+![Giao diện ứng dụng mẫu (ảnh chụp ở chế độ kiểm thử giao diện, không dùng mô hình ngôn ngữ)](images/demo_ui_rule.png){#fig-demo width=90%}
+
+Kịch bản sử dụng tiêu biểu: *khách hỏi giá* → Agent gọi `get_menu_item` → trả lời đúng giá trong cơ sở dữ liệu; *khách hỏi món chưa có giá* → chatbot từ chối và chuyển nhân viên thay vì bịa; *khách đặt bàn* → Agent kiểm tra bàn trống, hỏi tên và số điện thoại, đọc lại thông tin để khách xác nhận rồi mới ghi, trả về mã đặt bàn. Video trình diễn 2–3 phút theo kịch bản tại `demo/README.md`.
+
+## Kế hoạch triển khai thực tế và đo lường tác động
+
+**Tích hợp vào quy trình hiện có.** Chatbot được kết nối với fanpage qua webhook Messenger Platform: tin nhắn đến được chuyển cho Agent, câu trả lời gửi lại khách, và mọi hội thoại cần chuyển nhân viên được đẩy vào hộp thư của quản lý ca kèm tóm tắt. Lộ trình gồm ba giai đoạn: (1) *chạy bóng* 2 tuần – chatbot soạn câu trả lời nhưng nhân viên duyệt trước khi gửi, dùng để đo tỷ lệ câu trả lời được chấp nhận nguyên văn; (2) tự động trả lời ngoài giờ cao điểm và sau 22h; (3) tự động toàn thời gian với ngưỡng chuyển nhân viên. Cơ sở dữ liệu giá và thực đơn là nguồn sự thật duy nhất, được quản lý cập nhật qua một trang quản trị đơn giản.
+
+**Theo dõi suy giảm hiệu năng (drift).** Bảng theo dõi hằng tuần gồm: tỷ lệ chuyển nhân viên và tỷ lệ từ chối (tăng đột biến báo hiệu câu hỏi mới ngoài phạm vi dữ liệu); tỷ lệ câu hỏi giá có gọi công cụ; tỷ lệ tên món không tìm thấy trong cơ sở dữ liệu (thực đơn mới chưa cập nhật); **data drift** đo bằng phân phối cosine giữa câu hỏi mới và câu huấn luyện gần nhất – cùng phương pháp đã dùng để kiểm tra rò rỉ ở Phần 3 – với ngưỡng cảnh báo khi trung vị giảm rõ rệt so với mốc ban đầu; và mẫu ngẫu nhiên 30 hội thoại/tuần do nhân viên chấm. Khi các chỉ số vượt ngưỡng, hội thoại thực tế đã ẩn danh được bổ sung vào dữ liệu và huấn luyện lại bộ điều hợp LoRA – chi phí thấp vì chỉ huấn luyện vài chục triệu tham số.
+
+## Hạn chế hiện tại và hướng nghiên cứu mở rộng
+
+**Hạn chế.** Về dữ liệu: bộ hội thoại gốc do LLM sinh rồi người duyệt nên văn phong lặp nhiều; 32/106 món chưa có giá và 26 món có giá mâu thuẫn cần nhà hàng xác nhận; thông tin dị ứng là suy luận; dữ liệu bàn và đặt bàn là mô phỏng; các mẫu theo khuôn có độ đa dạng ngôn ngữ thấp. Về phần cứng: GPU T4 miễn phí giới hạn cỡ mô hình ở 3 tỷ tham số và số lần chạy lặp với nhiều hạt giống. Về thuật toán: bộ định tuyến ý định dùng luật từ khóa; đánh giá bằng LLM-as-judge vẫn có thể thiên lệch dù đã hiệu chỉnh.
+
+**Hướng phát triển.** (1) Thu thập hội thoại thật từ fanpage (đã ẩn danh) để thay dữ liệu tổng hợp; (2) mở rộng sang mô hình 7–8 tỷ tham số bằng QLoRA khi có GPU lớn hơn; (3) tích hợp kênh Zalo OA và đặt món giao hàng; (4) học tăng cường từ phản hồi của nhân viên (DPO) trên các câu trả lời bị sửa trong giai đoạn chạy bóng; (5) cá nhân hóa gợi ý món theo lịch sử đặt bàn khi có sự đồng ý của khách.
 
 ```{=latex}
 \clearpage

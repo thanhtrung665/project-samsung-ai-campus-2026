@@ -188,3 +188,19 @@ def run(split="test_synth", use_models=True) -> pd.DataFrame:
 
 if __name__ == "__main__":
     print(run().round(3).to_string())
+
+
+def explain_bm25(r: HybridRetriever, q: str, top_terms: int = 6) -> dict:
+    """XAI cho bộ truy xuất: tách điểm BM25 của chunk hạng 1 thành đóng góp của từng token truy vấn
+    idf(t) · f(t,d)·(k1+1) / (f(t,d) + k1·(1 − b + b·|d|/avgdl)). Tổng các đóng góp = điểm BM25 của chunk."""
+    bm = r.bm25
+    i = int(r.rank_bm25(q)[0])
+    freqs, dl = bm.doc_freqs[i], bm.doc_len[i]
+    contrib = {}
+    for t in dict.fromkeys(tokenize(q)):
+        f = freqs.get(t, 0)
+        if f:
+            contrib[t] = bm.idf.get(t, 0) * f * (bm.k1 + 1) / (f + bm.k1 * (1 - bm.b + bm.b * dl / bm.avgdl))
+    terms = sorted(contrib.items(), key=lambda x: -x[1])
+    return {"chunk_id": r.docs[i]["chunk_id"], "title": r.docs[i]["title"], "score": float(sum(contrib.values())),
+            "bm25_score": float(bm.get_scores(tokenize(q))[i]), "terms": terms[:top_terms]}

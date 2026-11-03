@@ -2,6 +2,20 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-03 (khuya) — Phần B: T14, T12, khung Phần 4–6, T16, T17
+- **T14** `demo/app.py` Gradio: hội thoại, vết công cụ, đoạn RAG, công tắc RAG / công cụ, tab What-if đổi giá (đã kiểm: đổi Cơm Lươn
+  209.000 → 250.000 thì chatbot trả lời giá mới, DB gốc không đổi); backend `hf` (GPU) và `rule` (thử giao diện, không LLM).
+  `demo/README.md` (cách nộp + kịch bản video 7 bước), `K7_demo.ipynb` (link gradio.live trên Kaggle), ảnh `images/demo_ui_rule.png`.
+- **T12** `agent_eval.py`: định tuyến công cụ (confusion matrix + trọng số chi phí kinh doanh — giả định), kịch bản nhiều lượt chấm
+  theo trạng thái DB + HITL (create_reservation chỉ sau lượt xác nhận). Kiểm thử: mô hình giả lập hoàn hảo 21/21 proxy đạt;
+  agent "vội" đặt bàn ngay lượt đầu bị bắt `hitl_ok=False`. `K6_agent_eval.ipynb`.
+- **Phần 4–6** trong `.qmd`: bảng sinh bởi `report_tables.py` từ `results/` (thiếu → TBD, không bịa); số thật đã có: ablation
+  truy xuất, phân rã BM25 (XAI, tổng đóng góp = điểm BM25 34,785), thống kê dữ liệu. Phần 5 có lý do chọn metric chính (fact-EM
+  giá / bịa giá), bảng chi phí nhầm lẫn, đạo đức AI; Phần 6 có prototype, lộ trình triển khai 3 giai đoạn, giám sát drift, hạn chế.
+- **T16** PDF 34 trang ≤ 45; mục lục / DM bảng / DM hình đã có. Bổ sung Claude Code vào Tuyên bố sử dụng AI (cần tác giả duyệt).
+- **T17** `code/make_submission.py`: kiểm hạng mục, ≤ 45 trang, SHA-256 test, file > 50 MB, secret, TBD/placeholder → zip
+  `Nhom_XX_..._.zip` (thử: 66 file, 4 MB). `README.md` gốc cho người chấm.
+
 ### 2026-11-03 (đêm) — T07b bộ dữ liệu SFT v2
 - `prepare_sft_v2.py` + `05_prepare_sft_v2.ipynb` → `data/splits_v2/{train,val}.jsonl` (4.980 / 580 hội thoại, 433 nhiều lượt)
   + dataset card `data/splits_v2/README.md`. Làm sạch (−60 trùng, −239 nhãn mâu thuẫn); 235 câu hỏi giá → gọi `get_menu_item`
@@ -72,9 +86,9 @@
 | I. Bài toán (15%) | ✅ | Phần 1 đủ, ROI có công thức + độ nhạy |
 | Lý thuyết (Phần 2) | ✅ | đã có hình kiến trúc, còn thiếu logo |
 | II. EDA & tiền xử lý (20%) | ✅ | Phần 3 + notebook 01–03; còn bổ sung mẫu RAFT/tool-call |
-| III. Mô hình (25%) | ⬜ | chưa train |
-| IV. Đánh giá / XAI / đạo đức (15%) | ⬜ | |
-| V. Prototype (15%) | ⬜ | |
+| III. Mô hình (25%) | 🟡 | Phần 4 viết khung + ablation truy xuất có số; chờ GPU (K2–K4) |
+| IV. Đánh giá / XAI / đạo đức (15%) | 🟡 | Phần 5 viết; XAI BM25 có số; chờ K5–K6 |
+| V. Prototype (15%) | 🟡 | app Gradio chạy được; chờ adapter để quay video |
 | VI. Trình bày & code (10%) | 🟡 | `code/` 4 notebook chạy sạch; PDF render được |
 | Bonus | 🟡 | dữ liệu dựa trên nhà hàng thật; chưa có người dùng thử |
 
