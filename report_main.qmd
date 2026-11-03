@@ -1,0 +1,505 @@
+---
+title: "Nghiên cứu xây dựng Chatbot chăm sóc khách hàng dựa trên công nghệ Hybrid-RAG kết hợp Fine-tuning mô hình Qwen & LLaMA"
+subtitle: "Học phần Trí tuệ Nhân tạo Ứng dụng & Khoa học Dữ liệu - SIC 2026"
+author: "Hồ Thành Trung - 075205020424"
+date: "2026-11-11"
+lang: "vi"
+format:
+    pdf:
+        documentclass: article
+        papersize: a4
+        pdf-engine: xelatex
+        toc: false
+        number-sections: true
+        colorlinks: true
+        fontsize: 11pt
+        mainfont: "Times New Roman"
+        linestretch: 1.3
+        geometry:
+            - top=2.5cm
+            - bottom=2.5cm
+            - left=3cm
+            - right=2cm
+        fig-cap-location: bottom
+        tbl-cap-location: top
+        fig-pos: "H"
+        include-in-header:
+            text: |
+                \usepackage{float}
+                \usepackage{tikz}
+                \usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+                \usepackage{array}
+                \usepackage{booktabs}
+                \usepackage{tabularx}
+                \counterwithin{figure}{section}
+                \counterwithin{table}{section}
+                \setlength{\parindent}{1.25cm}
+                \setlength{\parskip}{4pt}
+                \renewcommand{\contentsname}{MỤC LỤC}
+                \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+                \renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
+                % ---------- Trang bìa ----------
+                \renewcommand{\maketitle}{%
+                  \begin{titlepage}
+                  \thispagestyle{empty}
+                  \begin{tikzpicture}[remember picture,overlay]
+                    \draw[line width=2pt] ([xshift=2cm,yshift=-1.6cm]current page.north west)
+                      rectangle ([xshift=-1.6cm,yshift=1.6cm]current page.south east);
+                    \draw[line width=0.6pt] ([xshift=2.15cm,yshift=-1.75cm]current page.north west)
+                      rectangle ([xshift=-1.75cm,yshift=1.75cm]current page.south east);
+                  \end{tikzpicture}
+                  \centering
+                  {\large\bfseries [TÊN TRƯỜNG ĐẠI HỌC]\par}
+                  \vspace{2pt}
+                  {\large\bfseries [TÊN KHOA]\par}
+                  \vspace{4pt}
+                  {\large\bfseries CHƯƠNG TRÌNH SAMSUNG INNOVATION CAMPUS (SIC) 2026\par}
+                  \vspace{0.6cm}
+                  \IfFileExists{images/logo.png}{\includegraphics[width=3.2cm]{images/logo.png}\par}{\rule{0pt}{3.2cm}\par}
+                  \vspace{0.8cm}
+                  {\Large\bfseries TIỂU LUẬN BÁO CÁO CUỐI KHÓA\par}
+                  \vspace{4pt}
+                  {\large Học phần: Trí tuệ Nhân tạo Ứng dụng \& Khoa học Dữ liệu\par}
+                  \vspace{1.2cm}
+                  \begin{minipage}{0.86\textwidth}\centering
+                  {\LARGE\bfseries\linespread{1.15}\selectfont Nghiên cứu xây dựng chatbot chăm sóc khách hàng dựa trên công nghệ Hybrid-RAG kết hợp fine-tuning mô hình Qwen và LLaMA\par}
+                  \vspace{0.4cm}
+                  {\large\itshape Ứng dụng tại nhà hàng Kimochi Sushi\par}
+                  \end{minipage}
+                  \vfill
+                  \begin{tabular}{@{}l@{\hspace{0.6cm}}l@{}}
+                  \textbf{Sinh viên thực hiện:} & Hồ Thành Trung \\
+                  \textbf{Mã số sinh viên:} & 075205020424 \\
+                  \textbf{Giảng viên hướng dẫn:} & [Học hàm, học vị, họ tên giảng viên] \\
+                  \textbf{Mã đề tài:} & [Mã đề tài] \\
+                  \end{tabular}
+                  \vspace{1.6cm}
+
+                  {\large\bfseries TP. Hồ Chí Minh, tháng 11 năm 2026\par}
+                  \end{titlepage}
+                  \setcounter{page}{1}
+                }
+execute:
+    echo: false
+    warning: false
+crossref:
+    fig-title: "Hình"
+    tbl-title: "Bảng"
+    eq-title: "Công thức"
+    fig-prefix: "Hình"
+    tbl-prefix: "Bảng"
+    eq-prefix: "Công thức"
+---
+
+```{=latex}
+\pagenumbering{roman}
+\renewcommand{\contentsname}{MỤC LỤC}
+\renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+\renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
+```
+
+# Bảng phân công nhiệm vụ và tỷ lệ đóng góp {.unnumbered}
+
+Đề tài được thực hiện theo hình thức **cá nhân**. Toàn bộ các hạng mục công việc từ khảo sát nghiệp vụ, xây dựng dữ liệu, huấn luyện mô hình, phát triển ứng dụng đến biên soạn báo cáo đều do sinh viên trực tiếp đảm nhận.
+
+| STT | Hạng mục công việc | Người phụ trách | Tỷ lệ đóng góp |
+|:--:|:-------------------------------------------------------|:---------------|:----------:|
+| 1 | Khảo sát nghiệp vụ, xác định bài toán kinh doanh (Design Thinking) | Hồ Thành Trung | 100% |
+| 2 | Xây dựng cơ sở dữ liệu SQL, kho tri thức NoSQL và bộ dữ liệu hội thoại | Hồ Thành Trung | 100% |
+| 3 | Khám phá và tiền xử lý dữ liệu (EDA) | Hồ Thành Trung | 100% |
+| 4 | Xây dựng Hybrid RAG và tinh chỉnh LoRA/QLoRA trên Qwen, LLaMA | Hồ Thành Trung | 100% |
+| 5 | Phát triển Agent truy cập SQL và NoSQL | Hồ Thành Trung | 100% |
+| 6 | Đánh giá, giải thích mô hình và phân tích đạo đức AI | Hồ Thành Trung | 100% |
+| 7 | Phát triển sản phẩm mẫu (Web App) và video demo | Hồ Thành Trung | 100% |
+| 8 | Biên soạn báo cáo Quarto và tài liệu tham khảo | Hồ Thành Trung | 100% |
+
+# Lời cảm ơn và Tuyên bố sử dụng AI {.unnumbered}
+
+Lời đầu tiên, tôi xin gửi lời cảm ơn chân thành đến [Học hàm, học vị, họ tên giảng viên] đã tận tình hướng dẫn, góp ý và định hướng trong suốt quá trình thực hiện tiểu luận. Tôi cũng xin cảm ơn Ban quản lý nhà hàng **Kimochi Sushi** đã cung cấp tư liệu thực đơn, thông tin vận hành và các mẫu hội thoại chăm sóc khách hàng trên fanpage, làm nền tảng cho dữ liệu của nghiên cứu.
+
+**Tuyên bố sử dụng AI.** Trong quá trình thực hiện, tôi có sử dụng các công cụ trí tuệ nhân tạo tạo sinh (Claude, ChatGPT, Gemini) với vai trò trợ lý: gợi ý cấu trúc kế hoạch nghiên cứu, hỗ trợ tra cứu tài liệu, rà soát cú pháp mã nguồn và sinh biến thể câu hỏi trong giai đoạn mở rộng dữ liệu. Toàn bộ nội dung học thuật, số liệu thực nghiệm, phân tích và kết luận trong báo cáo đều do tôi tự kiểm chứng, chỉnh sửa và chịu trách nhiệm. Các mẫu dữ liệu do AI sinh ra đều được thẩm định thủ công trước khi đưa vào huấn luyện, như trình bày tại Phần 3.
+
+```{=latex}
+\clearpage
+\tableofcontents
+\clearpage
+```
+
+# Danh mục từ viết tắt {.unnumbered}
+
+| Từ viết tắt | Tiếng Anh | Diễn giải tiếng Việt |
+|:-----------|:------------------------------------------|:------------------------------------------|
+| AI | Artificial Intelligence | Trí tuệ nhân tạo |
+| BM25 | Best Matching 25 | Thuật toán xếp hạng tìm kiếm theo từ khóa |
+| CRISP-DM | Cross-Industry Standard Process for Data Mining | Quy trình chuẩn liên ngành cho khai phá dữ liệu |
+| CSKH | — | Chăm sóc khách hàng |
+| F&B | Food and Beverage | Ngành dịch vụ ăn uống |
+| FAQ | Frequently Asked Questions | Câu hỏi thường gặp |
+| GPU | Graphics Processing Unit | Bộ xử lý đồ họa |
+| GQA | Grouped-Query Attention | Cơ chế chú ý truy vấn theo nhóm |
+| KPI | Key Performance Indicator | Chỉ số đo lường hiệu quả then chốt |
+| LLM | Large Language Model | Mô hình ngôn ngữ lớn |
+| LoRA | Low-Rank Adaptation | Tinh chỉnh thích nghi hạng thấp |
+| NF4 | 4-bit NormalFloat | Kiểu số thực chuẩn hóa 4 bit |
+| NoSQL | Not only SQL | Cơ sở dữ liệu phi quan hệ |
+| QLoRA | Quantized Low-Rank Adaptation | LoRA trên mô hình đã lượng tử hóa |
+| RAFT | Retrieval-Augmented Fine-Tuning | Tinh chỉnh có tăng cường truy xuất |
+| RAG | Retrieval-Augmented Generation | Sinh văn bản tăng cường truy xuất |
+| ReAct | Reasoning and Acting | Khung suy luận kết hợp hành động |
+| ROI | Return on Investment | Tỷ suất hoàn vốn |
+| RRF | Reciprocal Rank Fusion | Hợp nhất thứ hạng nghịch đảo |
+| SFT | Supervised Fine-Tuning | Tinh chỉnh có giám sát |
+| SMART | Specific, Measurable, Achievable, Relevant, Time-bound | Mục tiêu cụ thể, đo lường được, khả thi, liên quan, có thời hạn |
+| SQL | Structured Query Language | Ngôn ngữ truy vấn có cấu trúc |
+| VRAM | Video Random Access Memory | Bộ nhớ của GPU |
+| XAI | Explainable Artificial Intelligence | Trí tuệ nhân tạo có thể giải thích |
+
+```{=latex}
+\clearpage
+\listoftables
+\listoffigures
+\clearpage
+\pagenumbering{arabic}
+```
+
+# Giới thiệu và xác định bài toán kinh doanh
+
+*Phần này áp dụng hai giai đoạn **Empathize** (Thấu cảm) và **Define** (Xác định vấn đề) của phương pháp luận Design Thinking \[1\] nhằm định vị chính xác vấn đề kinh doanh trước khi lựa chọn giải pháp kỹ thuật.*
+
+## Bối cảnh thực tiễn và nỗi đau kinh doanh
+
+Sự cạnh tranh ngày càng gay gắt trong ngành dịch vụ ăn uống (F&B) đặt ra yêu cầu cao về **tốc độ** và **chất lượng chăm sóc khách hàng**. Bên cạnh việc mang đến những món ăn ngon, nhà hàng hiện nay cần có khả năng giải đáp thắc mắc, xử lý vấn đề và cung cấp thông tin kịp thời cho thực khách trên mọi kênh tiếp xúc, đặc biệt là kênh nhắn tin qua fanpage vốn đã trở thành điểm chạm đầu tiên của phần lớn khách hàng trẻ.
+
+**Kimochi Sushi** là nhà hàng ẩm thực Nhật Bản theo phong cách kết hợp Nhật – Việt, hiện vận hành **hai chi nhánh tại quận Bình Thạnh và quận Gò Vấp, TP. Hồ Chí Minh**, mở cửa từ 11h đến 22h hằng ngày. Thực đơn của nhà hàng gồm nhiều dòng sản phẩm như sushi, maki, sashimi, món nóng và đồ uống đặc trưng, với mức giá phổ biến từ khoảng 69.000 đến 79.000 đồng cho mỗi phần cơm cuộn. Hoạt động chăm sóc khách hàng chủ yếu được thực hiện thủ công bởi nhân viên trực fanpage, trả lời các câu hỏi về thực đơn, địa chỉ, khuyến mãi và hỗ trợ đặt bàn.
+
+Trong nghiên cứu trước đây \[2\], chúng tôi đã xây dựng phiên bản chatbot đầu tiên cho Kimochi Sushi bằng cách tinh chỉnh mô hình **LLaMA 3.2-1B** bằng LoRA trên hơn 7.000 cặp hội thoại và tích hợp kỹ thuật RAG cơ bản với cơ sở dữ liệu vector Qdrant. Kết quả thử nghiệm thực tế đã chỉ ra những hạn chế quan trọng, đồng thời cũng là động lực trực tiếp của nghiên cứu hiện tại. Kết hợp giữa kết quả đó và quan sát hoạt động vận hành, chúng tôi xác định **năm nỗi đau kinh doanh (pain points)** cốt lõi như sau:
+
+- **Quá tải câu hỏi lặp lại.** Phần lớn tin nhắn gửi đến fanpage xoay quanh một nhóm nhỏ chủ đề: xin thực đơn, hỏi giá, hỏi địa chỉ, giờ mở cửa và chương trình khuyến mãi. Nhân viên phải lặp lại cùng một nội dung nhiều lần mỗi ngày, gây lãng phí thời gian và làm giảm sự tập trung cho các yêu cầu phức tạp hơn như xử lý khiếu nại.
+
+- **Mất khách ngoài giờ cao điểm và ngoài giờ làm việc.** Tin nhắn đến vào giờ cao điểm phục vụ hoặc sau 22h thường phải chờ lâu mới được phản hồi. Với khách hàng có nhu cầu đặt bàn, thời gian chờ này đồng nghĩa với nguy cơ khách chuyển sang lựa chọn nhà hàng khác, gây **tổn thất doanh thu trực tiếp**.
+
+- **Rủi ro thông tin sai lệch, đặc biệt về dị ứng và giá cả.** Thực đơn kết hợp Nhật – Việt có nguyên liệu đa dạng (hải sản, trứng cá, sốt mayonnaise, đậu phộng...). Một câu trả lời sai về thành phần có thể gây **rủi ro sức khỏe** cho khách dị ứng, còn sai về giá hoặc khuyến mãi dẫn đến khiếu nại và tổn hại uy tín. Đây cũng là rủi ro cố hữu của hiện tượng "ảo giác" (hallucination) ở các mô hình ngôn ngữ lớn \[3\].
+
+- **Thông tin động không được cập nhật kịp thời.** Giá món, tình trạng còn món, bàn trống và chương trình ưu đãi thay đổi theo ngày hoặc theo sự kiện. Phiên bản chatbot trước chỉ "ghi nhớ" kiến thức trong trọng số mô hình và kho vector tĩnh, nên không thể trả lời các câu hỏi giao dịch như *"tối nay 7 giờ chi nhánh Gò Vấp còn bàn cho 4 người không?"*.
+
+- **Chất lượng phiên bản chatbot hiện có chưa đáp ứng vận hành thực tế.** Kết quả đánh giá trước đây cho thấy **tỷ lệ fallback lên đến 25,7%** trên 300 câu hỏi tự nhiên của khách hàng, tức cứ khoảng 4 câu hỏi thì có 1 câu chatbot không trả lời được đúng trọng tâm. Chatbot cũng thường "quên" ngữ cảnh trong hội thoại nhiều lượt. Đáng chú ý, mức cải thiện đo bằng BERTScore F1 giữa mô hình tinh chỉnh và mô hình gốc chỉ là **0,7430 so với 0,7390**, cho thấy các thước đo trùng khớp từ vựng như ROUGE hay BERTScore chưa phản ánh được chất lượng thực sự về tính đúng đắn của câu trả lời.
+
+Từ các nỗi đau trên, bài toán đặt ra không chỉ là "làm một chatbot trả lời tự nhiên hơn", mà là **xây dựng một trợ lý CSKH vừa nói đúng giọng điệu thương hiệu, vừa trả lời chính xác dựa trên dữ liệu cập nhật, vừa có khả năng thực hiện tác vụ** như tra cứu bàn trống hay đặt bàn.
+
+## Chân dung người dùng mục tiêu và bản đồ thấu cảm
+
+Dựa trên các mẫu tin nhắn CSKH trên fanpage chính thức của Kimochi Sushi và quá trình trao đổi với quản lý nhà hàng, chúng tôi xác định ba nhóm người dùng hưởng lợi trực tiếp từ giải pháp, được mô tả qua ba chân dung (persona) tại @tbl-persona.
+
+| Tiêu chí | Persona 1: Khách đặt bàn | Persona 2: Khách có nhu cầu ăn uống đặc biệt | Persona 3: Quản lý ca / nhân viên trực fanpage |
+|:-----------|:-------------------------|:-------------------------|:-------------------------|
+| Đại diện | Minh Anh, 24 tuổi, nhân viên văn phòng tại Bình Thạnh | Chị Hà, 35 tuổi, có con nhỏ dị ứng tôm | Anh Khoa, 28 tuổi, quản lý ca chi nhánh Gò Vấp |
+| Bối cảnh sử dụng | Nhắn tin fanpage buổi trưa hoặc tối muộn để đặt bàn cho nhóm bạn | Tìm hiểu kỹ thành phần trước khi đưa gia đình đi ăn cuối tuần | Vừa điều phối phục vụ tại quầy vừa trả lời tin nhắn trên điện thoại |
+| Mục tiêu | Biết nhanh còn bàn không, giá khoảng bao nhiêu, có ưu đãi gì | Chắc chắn món ăn an toàn với người dị ứng, có lựa chọn phù hợp cho trẻ em | Giảm số tin nhắn lặp lại, không bỏ sót khách đặt bàn |
+| Nỗi đau | Phải chờ phản hồi lâu, thường viết tắt, không dấu, hỏi nhiều ý trong một câu | Nhân viên trả lời chung chung, thiếu chi tiết về nguyên liệu | Giờ cao điểm không thể trả lời kịp, dễ nhầm lẫn thông tin khuyến mãi |
+| Kỳ vọng với chatbot | Phản hồi tức thì, đặt bàn ngay trong cuộc trò chuyện | Câu trả lời có căn cứ rõ ràng, khuyến nghị xác nhận lại với nhân viên | Chatbot tự xử lý câu hỏi phổ biến và chuyển giao đúng lúc kèm tóm tắt |
+
+: Chân dung ba nhóm người dùng mục tiêu {#tbl-persona}
+
+Trong đó, **Persona 1** đại diện cho nhóm khách hàng chiếm tỷ trọng lớn nhất trên kênh nhắn tin, **Persona 2** đại diện cho nhóm có rủi ro cao nhất khi thông tin sai lệch, còn **Persona 3** là người vận hành trực tiếp và thụ hưởng hiệu quả giảm tải. Để hiểu sâu hơn trải nghiệm của nhóm khách hàng trọng tâm, @tbl-empathy trình bày bản đồ thấu cảm (Empathy Map) của Persona 1.
+
+| Nói (Says) | Nghĩ (Thinks) |
+|:------------------------------------------|:------------------------------------------|
+| "Shop ơi tối nay còn bàn 4 người không ạ?"; "Menu bn vậy shop?"; "Có combo nào cho nhóm không?" | "Nhắn mãi chưa thấy trả lời, chắc đặt chỗ khác cho nhanh"; "Không biết giá trên hình menu còn đúng không" |
+| **Làm (Does)** | **Cảm thấy (Feels)** |
+| Nhắn cùng lúc cho 2–3 nhà hàng để so sánh; chụp màn hình menu gửi nhóm bạn; quay lại hỏi nhiều lần khi chưa có phản hồi | Sốt ruột khi phải chờ; hài lòng khi được phản hồi nhanh và lịch sự; khó chịu khi đến nơi mới biết hết bàn hoặc giá khác với thông tin đã nhận |
+
+: Bản đồ thấu cảm của Persona 1 – Khách đặt bàn {#tbl-empathy}
+
+Bản đồ thấu cảm cho thấy với nhóm khách hàng này, **tốc độ phản hồi và độ tin cậy của thông tin** là hai yếu tố quyết định việc họ có chọn Kimochi Sushi hay không. Một chatbot chỉ trả lời tự nhiên nhưng không xác nhận được bàn trống, hoặc đưa ra giá đã lỗi thời, sẽ không giải quyết được nỗi đau thực sự của khách hàng.
+
+## Phân loại bài toán AI và mục tiêu SMART
+
+**Phân loại bài toán.** Xét theo bốn nhóm bài toán ứng dụng AI là *Optimization* (Tối ưu hóa), *Insight* (Khai phá thông tin), *Solution* (Tự động hóa tác vụ) và *Discovery* (Khám phá tri thức), đề tài thuộc nhóm **Solution – tự động hóa tác vụ chăm sóc khách hàng**. Hệ thống trực tiếp thay thế một phần công việc lặp lại của nhân viên trực fanpage: tư vấn thực đơn, giải đáp chính sách, tra cứu thông tin và hỗ trợ đặt bàn. Về mặt kỹ thuật, bài toán được cấu thành từ ba bài toán con: (i) **sinh ngôn ngữ có điều kiện** theo đúng giọng điệu thương hiệu, (ii) **truy xuất thông tin** từ kho tri thức phi cấu trúc, và (iii) **ra quyết định chọn công cụ** để truy vấn dữ liệu có cấu trúc.
+
+**Câu hỏi nghiên cứu.** Để giải quyết bài toán trên một cách có hệ thống, nghiên cứu tập trung trả lời bốn câu hỏi:
+
+- **RQ1:** Giữa hai họ mô hình mã nguồn mở cùng quy mô khoảng 3 tỷ tham số là **Qwen2.5** và **LLaMA 3.2**, mô hình nào thích nghi tốt hơn với nhiệm vụ CSKH bằng tiếng Việt sau khi tinh chỉnh?
+- **RQ2:** Kỹ thuật **QLoRA** đánh đổi bao nhiêu chất lượng để tiết kiệm bao nhiêu bộ nhớ GPU so với **LoRA** tiêu chuẩn?
+- **RQ3:** Kỹ thuật **Hybrid RAG** (kết hợp tìm kiếm từ khóa và tìm kiếm ngữ nghĩa) cải thiện độ chính xác truy xuất bao nhiêu so với từng phương pháp đơn lẻ, và mô hình tinh chỉnh kết hợp Hybrid RAG có vượt trội so với RAG thuần túy hay không?
+- **RQ4:** Một **Agent** có khả năng truy cập đồng thời cơ sở dữ liệu SQL và NoSQL có hoàn thành được các kịch bản giao dịch nhiều lượt (như đặt bàn) với độ tin cậy đủ cho vận hành thực tế hay không?
+
+**Mục tiêu SMART.** Các mục tiêu kinh doanh được lượng hóa thành những KPI cụ thể tại @tbl-smart. Mốc thời gian đo lường là ngày 07/11/2026, thời điểm hoàn tất giai đoạn đánh giá toàn diện của dự án.
+
+| KPI | Định nghĩa đo lường | Hiện trạng (phiên bản trước) | Mục tiêu |
+|:--------------------------|:------------------------------------------|:--------------:|:--------------:|
+| Tỷ lệ tự xử lý (deflection rate) | Tỷ lệ hội thoại chatbot giải quyết trọn vẹn, không cần chuyển nhân viên | Chưa đo | $\geq 70\%$ |
+| Tỷ lệ fallback | Tỷ lệ câu hỏi trong phạm vi nhưng chatbot không trả lời được | 25,7% | $\leq 10\%$ |
+| Độ chính xác dữ kiện | Tỷ lệ câu trả lời có giá, giờ, địa chỉ khớp hoàn toàn với cơ sở dữ liệu | Chưa đo | $100\%$ |
+| Độ bám sát ngữ cảnh (Faithfulness) | Điểm RAGAS đo mức câu trả lời được hỗ trợ bởi tài liệu truy xuất | Chưa đo | $\geq 0{,}85$ |
+| Độ phủ truy xuất (Recall@5) | Tỷ lệ câu hỏi có tài liệu đúng nằm trong 5 kết quả đầu | Chưa đo | $\geq 0{,}90$ |
+| Hoàn thành tác vụ đặt bàn | Tỷ lệ kịch bản đặt bàn nhiều lượt được ghi đúng vào cơ sở dữ liệu | Không hỗ trợ | $\geq 90\%$ |
+| Độ trễ phản hồi | Thời gian phản hồi ở phân vị 95 (p95) | 3–5 giây (trung bình) | $\leq 5$ giây |
+
+: Hệ thống mục tiêu SMART và KPI của dự án {#tbl-smart}
+
+Các mục tiêu này đáp ứng đầy đủ tiêu chí SMART: **cụ thể** (gắn với từng nỗi đau đã xác định), **đo lường được** (mỗi KPI có công thức tính trên tập kiểm thử độc lập), **khả thi** (dựa trên hiện trạng của phiên bản trước và năng lực mô hình 3B), **liên quan** trực tiếp đến trải nghiệm khách hàng và chi phí vận hành, và **có thời hạn** rõ ràng.
+
+## Ước tính hiệu quả kinh tế
+
+Hiệu quả kinh tế của giải pháp được ước tính dựa trên hai nguồn lợi ích: **(1) tiết kiệm chi phí nhân sự** nhờ chatbot tự xử lý câu hỏi lặp lại, và **(2) doanh thu giữ lại** từ các yêu cầu đặt bàn ngoài giờ vốn có nguy cơ bị bỏ lỡ. Lợi ích hằng năm $B$ được tính theo công thức:
+
+$$
+B = \underbrace{N \cdot r \cdot \frac{t}{60} \cdot w \cdot 365}_{\text{Tiết kiệm nhân sự}} \;+\; \underbrace{N \cdot p_{1} \cdot p_{2} \cdot p_{3} \cdot V \cdot m \cdot 365}_{\text{Lợi nhuận gộp giữ lại}}
+$$ {#eq-benefit}
+
+và tỷ suất hoàn vốn năm đầu được xác định bởi:
+
+$$
+\text{ROI} = \frac{B - C}{C}, \qquad C = C_{\text{dev}} + C_{\text{infra}} + C_{\text{maint}}
+$$ {#eq-roi}
+
+Do chưa có số liệu vận hành chính thức, các tham số đầu vào được thiết lập theo **giả định thận trọng** tại @tbl-roi-input và sẽ được hiệu chỉnh khi có số liệu thực tế từ quản lý nhà hàng.
+
+| Tham số | Ý nghĩa | Giá trị giả định |
+|:-------:|:--------------------------------------------------------|:--------------------|
+| $N$ | Số tin nhắn CSKH trung bình mỗi ngày (2 chi nhánh) | 120 tin/ngày |
+| $r$ | Tỷ lệ tin nhắn chatbot tự xử lý (KPI mục tiêu) | 70% |
+| $t$ | Thời gian nhân viên xử lý một tin nhắn | 3 phút |
+| $w$ | Chi phí nhân sự trực fanpage | 30.000 đồng/giờ |
+| $p_{1}$ | Tỷ lệ tin nhắn đến ngoài giờ hoặc giờ cao điểm không kịp phản hồi | 15% |
+| $p_{2}$ | Tỷ lệ trong số đó là yêu cầu đặt bàn | 20% |
+| $p_{3}$ | Tỷ lệ khách được giữ lại nhờ phản hồi tức thì | 25% |
+| $V$ | Giá trị hóa đơn bình quân mỗi lượt đặt bàn | 400.000 đồng |
+| $m$ | Biên lợi nhuận gộp | 30% |
+| $C$ | Chi phí năm đầu: phát triển 20 triệu, hạ tầng 1,5 triệu/tháng, bảo trì dữ liệu 0,5 triệu/tháng | 44 triệu đồng |
+
+: Tham số giả định cho mô hình ước tính ROI {#tbl-roi-input}
+
+Với các giả định trên, phần tiết kiệm nhân sự đạt khoảng $120 \times 0{,}7 \times 3/60 = 4{,}2$ giờ công mỗi ngày, tương ứng **45,99 triệu đồng/năm**. Phần lợi nhuận gộp giữ lại đạt khoảng 0,9 lượt đặt bàn mỗi ngày, tương ứng **39,42 triệu đồng/năm**. Tổng lợi ích $B \approx 85{,}41$ triệu đồng, cho **ROI năm đầu khoảng 94%** và **thời gian hoàn vốn khoảng 6,2 tháng**. @tbl-roi-sens trình bày phân tích độ nhạy theo các kịch bản khác nhau.
+
+| Kịch bản | Tỷ lệ tự xử lý $r$ | Tính lợi nhuận giữ lại | Lợi ích $B$ (triệu đồng/năm) | ROI năm đầu |
+|:------------|:----------:|:------------:|:------------:|:----------:|
+| Kỳ vọng | 70% | Có | 85,41 | 94,1% |
+| Thận trọng | 50% | Có | 72,27 | 64,3% |
+| Bi quan | 50% | Không | 32,85 | −25,3% |
+
+: Phân tích độ nhạy của ROI theo các kịch bản {#tbl-roi-sens}
+
+Phân tích độ nhạy cho thấy một nhận định kinh doanh quan trọng: **hiệu quả kinh tế của chatbot phụ thuộc chủ yếu vào khả năng giữ chân khách đặt bàn**, chứ không chỉ ở việc tiết kiệm giờ công. Nếu chatbot chỉ trả lời thông tin mà không hỗ trợ đặt bàn, dự án có thể không hoàn vốn trong năm đầu. Đây chính là cơ sở kinh doanh cho quyết định tích hợp **Agent truy cập cơ sở dữ liệu SQL** để thực hiện tác vụ đặt bàn trực tiếp trong hội thoại. Ở Phần 5, mô hình ROI sẽ được tính lại bằng tỷ lệ tự xử lý đo được thực tế và ma trận chi phí sai sót của Agent, trong đó lỗi tư vấn sai về dị ứng được gán chi phí rủi ro cao nhất.
+
+# Cơ sở lý thuyết và quy trình nghiên cứu
+
+## Tổng quan phương pháp luận CRISP-DM
+
+**CRISP-DM** (Cross-Industry Standard Process for Data Mining) là quy trình chuẩn liên ngành cho các dự án khai phá dữ liệu, gồm sáu giai đoạn có tính lặp: Hiểu nghiệp vụ, Hiểu dữ liệu, Chuẩn bị dữ liệu, Mô hình hóa, Đánh giá và Triển khai \[4\]. Điểm mạnh của CRISP-DM là đặt **mục tiêu kinh doanh làm điểm khởi đầu và tiêu chí nghiệm thu cuối cùng**, đồng thời cho phép quay lại các giai đoạn trước khi kết quả đánh giá chưa đạt yêu cầu. Trong nghiên cứu này, CRISP-DM được vận dụng cho một dự án mô hình ngôn ngữ lớn, với "dữ liệu" bao gồm cả cơ sở dữ liệu nghiệp vụ, kho tài liệu tri thức và bộ dữ liệu hội thoại huấn luyện. Quy trình được minh họa tại @fig-crispdm, trong đó các mũi tên nét đứt thể hiện sự tương tác hai chiều giữa các giai đoạn xử lý và nguồn dữ liệu; khi kết quả đánh giá chưa đạt KPI, quy trình quay lại giai đoạn Hiểu nghiệp vụ để điều chỉnh mục tiêu hoặc bổ sung dữ liệu.
+
+::: {#fig-crispdm}
+
+```{=latex}
+\begin{tikzpicture}[
+  phase/.style={draw, rounded corners=4pt, line width=0.8pt, align=center,
+                text width=3.5cm, minimum height=1.25cm, font=\small, fill=white},
+  core/.style={draw, circle, line width=1.2pt, align=center, text width=2.3cm,
+               font=\small\bfseries, fill=blue!6},
+  arr/.style={-{Stealth[length=2.5mm]}, line width=0.8pt},
+  back/.style={-{Stealth[length=2.5mm]}, line width=0.8pt, dashed}
+]
+\node[core] (c) at (0,0) {Dữ liệu\\Kimochi Sushi\\[-1pt]\footnotesize\mdseries SQL · NoSQL · Hội thoại};
+\node[phase] (p1) at (90:3.6)  {\textbf{1. Hiểu nghiệp vụ}\\\footnotesize Pain points, persona, KPI, ROI};
+\node[phase] (p2) at (30:4.4)  {\textbf{2. Hiểu dữ liệu}\\\footnotesize Kho tri thức, taxonomy 12 ý định};
+\node[phase] (p3) at (-30:4.4) {\textbf{3. Chuẩn bị dữ liệu}\\\footnotesize Sinh, lọc, chia tập, EDA};
+\node[phase] (p4) at (-90:3.6) {\textbf{4. Mô hình hóa}\\\footnotesize Hybrid RAG, LoRA/QLoRA, Agent};
+\node[phase] (p5) at (-150:4.4){\textbf{5. Đánh giá}\\\footnotesize RAGAS, LLM-judge, XAI};
+\node[phase] (p6) at (150:4.4) {\textbf{6. Triển khai}\\\footnotesize Web App, giám sát drift};
+\draw[arr] (p1) to[bend left=12] (p2);
+\draw[arr] (p2) to[bend left=12] (p3);
+\draw[arr] (p3) to[bend left=12] (p4);
+\draw[arr] (p4) to[bend left=12] (p5);
+\draw[arr] (p5) to[bend left=12] (p6);
+\draw[arr] (p6) to[bend left=12] (p1);
+\draw[back,{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}] (p2.south west) -- (c.north east);
+\draw[back,{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}] (p3.north west) -- (c.south east);
+\draw[back,{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}] (p4.north) -- (c.south);
+\end{tikzpicture}
+```
+
+Quy trình CRISP-DM áp dụng cho dự án chatbot Kimochi Sushi
+
+:::
+
+Mỗi giai đoạn của CRISP-DM được ánh xạ vào các hoạt động cụ thể của dự án và các phần tương ứng của báo cáo như trình bày tại @tbl-crispdm. Cần lưu ý rằng giai đoạn *Hiểu nghiệp vụ* của CRISP-DM được thực hiện thông qua hai giai đoạn *Empathize* và *Define* của Design Thinking, giúp mục tiêu kinh doanh được xác định từ góc nhìn của người dùng thay vì từ góc nhìn công nghệ.
+
+| Giai đoạn CRISP-DM | Hoạt động cụ thể trong dự án | Phần báo cáo |
+|:--------------------|:-------------------------------------------------------|:----------:|
+| 1. Hiểu nghiệp vụ | Phân tích nỗi đau kinh doanh, xây dựng persona và bản đồ thấu cảm, thiết lập KPI SMART và ước tính ROI | Phần 1 |
+| 2. Hiểu dữ liệu | Xây dựng kho tri thức từ tư liệu chính thống của nhà hàng, thiết kế cơ sở dữ liệu SQL, phân loại câu hỏi thành 12 nhóm ý định | Phần 3 |
+| 3. Chuẩn bị dữ liệu | Sinh dữ liệu hội thoại có kiểm soát, lọc trùng lặp và sai lệch dữ kiện, chia tập theo nhóm chống rò rỉ, phân tích khám phá | Phần 3 |
+| 4. Mô hình hóa | Xây dựng Hybrid RAG, tinh chỉnh LoRA/QLoRA trên Qwen2.5 và LLaMA 3.2, tối ưu siêu tham số, phát triển Agent truy cập SQL và NoSQL | Phần 4 |
+| 5. Đánh giá | Đánh giá truy xuất, chất lượng sinh, độ chính xác dữ kiện, khả năng hoàn thành tác vụ; giải thích mô hình và phân tích đạo đức AI | Phần 5 |
+| 6. Triển khai | Phát triển Web App mẫu, kế hoạch tích hợp vận hành và giám sát suy giảm hiệu năng | Phần 6 |
+
+: Ánh xạ các giai đoạn CRISP-DM vào hoạt động của dự án {#tbl-crispdm}
+
+## Khái quát các thuật toán và công nghệ sử dụng
+
+### Mô hình ngôn ngữ lớn và kiến trúc Transformer
+
+Mô hình ngôn ngữ lớn (LLM) là các mạng nơ-ron sâu được huấn luyện trên lượng văn bản khổng lồ để dự đoán token tiếp theo trong chuỗi. Nền tảng của các LLM hiện đại là kiến trúc **Transformer** \[5\], với thành phần cốt lõi là cơ chế **tự chú ý (self-attention)** cho phép mỗi token "nhìn" và tổng hợp thông tin từ mọi token khác trong ngữ cảnh:
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
+$$ {#eq-attention}
+
+trong đó $Q$, $K$, $V$ lần lượt là các ma trận truy vấn (query), khóa (key) và giá trị (value) được chiếu tuyến tính từ biểu diễn đầu vào, và $d_k$ là số chiều của vector khóa. Các mô hình thuộc dòng *Instruct* được huấn luyện thêm bằng **tinh chỉnh có giám sát (SFT)** và học tăng cường từ phản hồi của con người để làm theo chỉ dẫn và hội thoại tự nhiên \[6\]. Đây là điểm xuất phát phù hợp cho bài toán chatbot CSKH.
+
+### Hai mô hình nền được so sánh: Qwen2.5 và LLaMA 3.2
+
+Nghiên cứu lựa chọn hai họ mô hình mã nguồn mở phổ biến nhất hiện nay ở cùng quy mô khoảng 3 tỷ tham số để đảm bảo so sánh công bằng: **Qwen2.5-3B-Instruct** của Alibaba \[7\] và **LLaMA-3.2-3B-Instruct** của Meta \[8, 9\]. Thông số chính của hai mô hình được tổng hợp tại @tbl-models.
+
+| Thông số | Qwen2.5-3B-Instruct | LLaMA-3.2-3B-Instruct |
+|:--------------------------|:------------------------------|:------------------------------|
+| Số tham số | Khoảng 3,09 tỷ | Khoảng 3,21 tỷ |
+| Số lớp Transformer | 36 | 28 |
+| Cơ chế chú ý | GQA: 16 đầu truy vấn, 2 đầu khóa–giá trị | GQA: 24 đầu truy vấn, 8 đầu khóa–giá trị |
+| Độ dài ngữ cảnh | 32.768 token | 128.000 token |
+| Kích thước từ vựng | Khoảng 151.000 token | 128.256 token |
+| Dữ liệu tiền huấn luyện | Khoảng 18 nghìn tỷ token | Tối đa khoảng 9 nghìn tỷ token, chưng cất từ LLaMA 3.1 8B/70B |
+| Hỗ trợ tiếng Việt | Có, trong hơn 29 ngôn ngữ được công bố | Không nằm trong 8 ngôn ngữ hỗ trợ chính thức |
+| Giấy phép | Qwen Research License | Llama 3.2 Community License |
+
+: So sánh thông số kỹ thuật của hai mô hình nền {#tbl-models}
+
+Sự khác biệt đáng chú ý nhất là **Qwen2.5 công bố hỗ trợ tiếng Việt trong dữ liệu đa ngôn ngữ**, trong khi LLaMA 3.2 không đưa tiếng Việt vào danh sách ngôn ngữ chính thức. Điều này tạo nên giả thuyết nghiên cứu cho RQ1: Qwen2.5 có lợi thế ở mô hình gốc, nhưng liệu khoảng cách đó có được thu hẹp sau khi tinh chỉnh trên dữ liệu chuyên biệt hay không. Việc tiếp tục sử dụng họ LLaMA cũng giúp kế thừa và so sánh trực tiếp với kết quả của phiên bản chatbot trước sử dụng LLaMA 3.2-1B.
+
+### Tinh chỉnh hiệu quả tham số: LoRA và QLoRA
+
+Tinh chỉnh toàn bộ tham số (full fine-tuning) một mô hình 3 tỷ tham số đòi hỏi bộ nhớ GPU vượt xa khả năng của các GPU phổ thông, do phải lưu trữ trọng số, gradient và trạng thái của bộ tối ưu cho toàn bộ mô hình. **LoRA (Low-Rank Adaptation)** \[10\] giải quyết vấn đề này dựa trên quan sát rằng phần cập nhật trọng số khi thích nghi mô hình cho một nhiệm vụ cụ thể có **hạng nội tại thấp**. Thay vì cập nhật trực tiếp ma trận trọng số $W_0 \in \mathbb{R}^{d \times k}$, LoRA đóng băng $W_0$ và học thêm hai ma trận nhỏ $A$ và $B$:
+
+$$
+h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} B A x, \qquad B \in \mathbb{R}^{d \times r},\; A \in \mathbb{R}^{r \times k},\; r \ll \min(d, k)
+$$ {#eq-lora}
+
+trong đó $r$ là hạng (rank) và $\alpha$ là hệ số tỷ lệ. Với một ma trận chiếu kích thước $3072 \times 3072$ trong LLaMA-3.2-3B (khoảng 9,44 triệu tham số), LoRA với $r = 16$ chỉ cần huấn luyện $16 \times (3072 + 3072) = 98.304$ tham số, tức **khoảng 1,04%**. Sau huấn luyện, $BA$ có thể được gộp trực tiếp vào $W_0$ nên **không làm tăng độ trễ suy luận**, và mỗi bộ trọng số LoRA (adapter) chỉ có dung lượng vài chục MB, thuận tiện cho việc lưu trữ và so sánh nhiều phiên bản.
+
+**QLoRA** \[11\] mở rộng LoRA bằng cách **lượng tử hóa mô hình gốc xuống 4 bit** trong khi vẫn huấn luyện adapter LoRA ở độ chính xác cao hơn. QLoRA đưa ra ba kỹ thuật chính: (i) kiểu dữ liệu **NF4 (4-bit NormalFloat)**, tối ưu về mặt lý thuyết thông tin cho trọng số có phân phối chuẩn; (ii) **lượng tử hóa kép (double quantization)**, lượng tử hóa cả các hằng số lượng tử để tiết kiệm thêm bộ nhớ; và (iii) **bộ tối ưu phân trang (paged optimizers)** giúp tránh tràn bộ nhớ khi xuất hiện đột biến sử dụng VRAM. Nhờ đó, trọng số của một mô hình 3 tỷ tham số giảm từ khoảng 6 GB (16 bit) xuống còn khoảng 2 GB. Tuy nhiên, sai số lượng tử hóa có thể ảnh hưởng đến chất lượng sinh, đặc biệt với các ngôn ngữ ít tài nguyên như tiếng Việt. Việc định lượng sự đánh đổi này chính là nội dung của RQ2.
+
+### Sinh văn bản tăng cường truy xuất và Hybrid RAG
+
+**RAG (Retrieval-Augmented Generation)** được Lewis và cộng sự đề xuất năm 2020 \[12\], kết hợp một bộ truy xuất tìm kiếm các đoạn văn bản liên quan từ kho tri thức với một mô hình sinh tạo câu trả lời dựa trên các đoạn văn bản đó. Theo phân loại của Gao và cộng sự \[13\], RAG đã phát triển qua ba thế hệ: *Naive RAG* với quy trình truy xuất rồi sinh đơn giản; *Advanced RAG* bổ sung các kỹ thuật tiền xử lý truy vấn và sắp xếp lại kết quả; và *Modular RAG* tách hệ thống thành các module có thể thay thế linh hoạt. Phiên bản chatbot trước của Kimochi Sushi thuộc thế hệ Naive RAG. Nghiên cứu này nâng cấp lên **Advanced RAG** với bốn thành phần chính.
+
+**Tìm kiếm từ khóa với BM25.** BM25 \[14\] là hàm xếp hạng dựa trên tần suất xuất hiện từ, tính điểm liên quan giữa truy vấn $q$ và tài liệu $D$:
+
+$$
+\text{BM25}(D, q) = \sum_{t \in q} \text{IDF}(t) \cdot \frac{f(t, D)\,(k_1 + 1)}{f(t, D) + k_1\left(1 - b + b\,\frac{|D|}{\text{avgdl}}\right)}
+$$ {#eq-bm25}
+
+trong đó $f(t, D)$ là tần suất của từ $t$ trong tài liệu $D$, $|D|$ là độ dài tài liệu, $\text{avgdl}$ là độ dài trung bình của các tài liệu, còn $k_1$ và $b$ là các tham số điều chỉnh. BM25 đặc biệt hiệu quả với **tên riêng và mã định danh** như "Salmon Mentai Maki", "Tonkotsu" hay mã đặt bàn, vốn là những từ thường xuyên xuất hiện trong câu hỏi của khách hàng nhà hàng Nhật.
+
+**Tìm kiếm ngữ nghĩa với vector dày đặc.** Phương pháp này mã hóa truy vấn và tài liệu thành vector trong cùng một không gian ngữ nghĩa rồi so khớp bằng độ tương đồng cosine \[15\]. Nghiên cứu sử dụng mô hình nhúng đa ngôn ngữ **BGE-M3** \[16\], hỗ trợ hơn 100 ngôn ngữ trong đó có tiếng Việt, với độ dài đầu vào tối đa 8.192 token. Tìm kiếm ngữ nghĩa xử lý tốt các câu hỏi diễn đạt tự do như *"món gì ấm bụng cho ngày mưa"*, nhưng lại dễ bỏ sót tên riêng và con số chính xác.
+
+**Hợp nhất thứ hạng nghịch đảo (RRF).** Do mỗi phương pháp mạnh ở một loại truy vấn khác nhau, Hybrid RAG kết hợp kết quả của cả hai bằng RRF \[17\]. Phương pháp này chỉ dựa vào thứ hạng nên không cần chuẩn hóa thang điểm vốn rất khác nhau giữa BM25 và độ tương đồng cosine:
+
+$$
+\text{RRF}(d) = \sum_{m \in \{\text{BM25},\ \text{Dense}\}} \frac{1}{k + \text{rank}_m(d)}, \qquad k = 60
+$$ {#eq-rrf}
+
+**Sắp xếp lại bằng cross-encoder.** Danh sách ứng viên sau hợp nhất được chấm điểm lại bởi một mô hình cross-encoder, mô hình đọc đồng thời truy vấn và tài liệu để đánh giá mức độ liên quan chính xác hơn bi-encoder \[18\]. Nghiên cứu sử dụng **BGE-Reranker-v2-M3** để giữ lại 3 đến 5 tài liệu liên quan nhất trước khi đưa vào mô hình sinh.
+
+Ngoài ra, để mô hình tinh chỉnh **biết cách sử dụng tài liệu truy xuất và biết từ chối khi tài liệu không liên quan**, nghiên cứu áp dụng ý tưởng **RAFT (Retrieval-Augmented Fine-Tuning)** \[19\]: trong dữ liệu huấn luyện, mỗi câu hỏi được ghép với tài liệu đúng cùng một số tài liệu gây nhiễu, và một phần mẫu chỉ chứa tài liệu gây nhiễu với đáp án chuẩn là lời từ chối lịch sự kèm đề nghị chuyển nhân viên. Đây là giải pháp trực tiếp cho vấn đề ảo giác và tỷ lệ fallback cao đã nêu ở Phần 1.
+
+### Agent và truy cập dữ liệu đa nguồn SQL – NoSQL
+
+Để chatbot không chỉ "trả lời" mà còn "hành động", nghiên cứu xây dựng một **Agent** theo khung **ReAct (Reasoning and Acting)** \[20\]. Trong ReAct, mô hình ngôn ngữ luân phiên giữa bước *suy luận* (xác định cần thông tin gì) và bước *hành động* (gọi một công cụ cụ thể), sau đó quan sát kết quả trả về để quyết định bước tiếp theo hoặc đưa ra câu trả lời cuối cùng. Các công cụ được mô tả bằng lược đồ JSON và mô hình sinh lời gọi hàm theo đúng định dạng (function calling).
+
+Dữ liệu của nhà hàng có hai bản chất khác nhau nên được lưu trữ trong hai loại cơ sở dữ liệu, như so sánh tại @tbl-sqlnosql. Dữ liệu **có cấu trúc và thay đổi thường xuyên** như giá món, bàn trống, đơn đặt bàn được lưu trong cơ sở dữ liệu quan hệ **SQL** và được truy vấn qua các hàm có tham số định sẵn, kèm một công cụ chuyển đổi ngôn ngữ tự nhiên sang SQL (text-to-SQL) ở chế độ chỉ đọc cho các câu hỏi phân tích ít gặp \[21\]. Dữ liệu **phi cấu trúc** như mô tả món, thành phần, chính sách và câu hỏi thường gặp được lưu trong cơ sở dữ liệu **NoSQL** dạng tài liệu (MongoDB) kết hợp cơ sở dữ liệu vector (Qdrant) để phục vụ Hybrid RAG.
+
+| Tiêu chí | SQL (PostgreSQL/SQLite) | NoSQL (MongoDB + Qdrant) |
+|:--------------------|:--------------------------------------|:--------------------------------------|
+| Mô hình dữ liệu | Bảng quan hệ, lược đồ cố định | Tài liệu JSON linh hoạt và vector nhúng |
+| Dữ liệu lưu trữ | Thực đơn và giá, chi nhánh, bàn, đặt bàn, đơn hàng, khuyến mãi | Mô tả món, thành phần và dị ứng, chính sách, FAQ |
+| Kiểu truy vấn | Chính xác tuyệt đối, lọc và tổng hợp theo điều kiện | Tìm kiếm theo từ khóa và theo ngữ nghĩa |
+| Tần suất cập nhật | Cao, theo ngày hoặc theo giao dịch | Thấp, theo đợt thay đổi thực đơn hoặc chính sách |
+| Công cụ của Agent | Hàm có tham số, text-to-SQL chỉ đọc | Hybrid RAG với trích dẫn nguồn |
+
+: So sánh vai trò của cơ sở dữ liệu SQL và NoSQL trong hệ thống {#tbl-sqlnosql}
+
+Việc tách biệt hai nguồn dữ liệu đảm bảo một nguyên tắc thiết kế quan trọng: **tinh chỉnh dạy mô hình *cách* trả lời, còn cơ sở dữ liệu quyết định *nội dung* trả lời**. Khi nhà hàng thay đổi giá món, chỉ cần cập nhật một dòng trong cơ sở dữ liệu SQL là chatbot trả lời đúng ngay lập tức mà không cần huấn luyện lại mô hình.
+
+### Phương pháp đánh giá hệ thống
+
+Kế thừa bài học từ nghiên cứu trước khi ROUGE và BERTScore không phân biệt rõ chất lượng giữa mô hình gốc và mô hình tinh chỉnh, nghiên cứu này sử dụng các thước đo phản ánh trực tiếp tính đúng đắn. Chất lượng của hệ thống RAG được đo bằng bộ chỉ số **RAGAS** \[22\], gồm mức độ bám sát ngữ cảnh (faithfulness), mức độ liên quan của câu trả lời và độ chính xác của ngữ cảnh truy xuất. Chất lượng tổng thể của câu trả lời được chấm bởi một mô hình ngôn ngữ mạnh đóng vai trò giám khảo theo thang tiêu chí định sẵn (**LLM-as-a-judge**) \[23\], có hiệu chỉnh đối chiếu với điểm chấm thủ công của con người. Các dữ kiện quan trọng như giá, giờ và địa chỉ được kiểm tra khớp tuyệt đối với cơ sở dữ liệu. Chi tiết được trình bày tại Phần 5.
+
+### Lý do lựa chọn giải pháp và kiến trúc tổng thể
+
+Để lựa chọn giải pháp phù hợp, chúng tôi so sánh bốn hướng tiếp cận phổ biến khi xây dựng chatbot CSKH dựa trên LLM, như tổng hợp tại @tbl-approach.
+
+| Tiêu chí | Chỉ dùng prompt | Chỉ tinh chỉnh | Chỉ dùng RAG | Tinh chỉnh + Hybrid RAG + Agent |
+|:------------------------|:----------:|:----------:|:----------:|:--------------:|
+| Giọng điệu thương hiệu nhất quán | Thấp | Cao | Thấp | Cao |
+| Thông tin cập nhật không cần huấn luyện lại | Thấp | Thấp | Cao | Cao |
+| Hạn chế ảo giác về dữ kiện | Thấp | Thấp | Trung bình | Cao |
+| Xử lý tên món tiếng Nhật và mã định danh | Thấp | Trung bình | Trung bình | Cao |
+| Thực hiện tác vụ (tra bàn trống, đặt bàn) | Không | Không | Không | Có |
+| Chi phí và độ phức tạp triển khai | Thấp | Trung bình | Trung bình | Cao |
+
+: So sánh các hướng tiếp cận xây dựng chatbot CSKH {#tbl-approach}
+
+Hướng tiếp cận kết hợp có chi phí triển khai cao nhất, nhưng là hướng duy nhất giải quyết đồng thời cả năm nỗi đau kinh doanh đã xác định ở Phần 1. Lựa chọn này được củng cố bởi ba lý do. Thứ nhất, **LoRA và QLoRA** cho phép tinh chỉnh mô hình 3 tỷ tham số trên GPU phổ thông 16 GB, phù hợp với nguồn lực của một dự án cá nhân và chi phí vận hành của một nhà hàng quy mô vừa. Thứ hai, **Hybrid RAG** bù đắp điểm yếu của từng phương pháp truy xuất đơn lẻ trước đặc thù câu hỏi pha trộn tên riêng tiếng Nhật, tiếng Việt không dấu và diễn đạt tự do. Thứ ba, **Agent truy cập SQL** là điều kiện để chatbot hỗ trợ đặt bàn, yếu tố quyết định hiệu quả kinh tế theo phân tích độ nhạy ROI. Kiến trúc tổng thể của hệ thống đề xuất được minh họa tại @fig-architecture.
+
+![Kiến trúc tổng thể đề xuất của hệ thống chatbot Kimochi Sushi](images/fig_kien_truc.png){#fig-architecture width=100%}
+
+Theo kiến trúc này, khách hàng tương tác với chatbot qua giao diện web. Agent sử dụng mô hình ngôn ngữ đã được tinh chỉnh tốt nhất để phân tích câu hỏi và lựa chọn một trong ba nhóm công cụ: truy vấn cơ sở dữ liệu SQL cho thông tin giao dịch, truy xuất Hybrid RAG trên kho NoSQL cho thông tin mô tả, hoặc chuyển giao cho nhân viên đối với khiếu nại và các trường hợp có độ tin cậy thấp. Khối huấn luyện ngoại tuyến thực hiện so sánh bốn cấu hình {Qwen2.5, LLaMA 3.2} × {LoRA, QLoRA} và chọn ra adapter tốt nhất để nạp vào Agent.
+
+```{=latex}
+\clearpage
+```
+
+# Tài liệu tham khảo {.unnumbered}
+
+```{=latex}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+```
+
+::: {.refs-list}
+\[1\] T. Brown, "Design thinking," *Harvard Business Review*, vol. 86, no. 6, pp. 84–92, 2008.
+
+\[2\] Hồ Thành Trung và cộng sự, "Xây dựng chatbot chăm sóc khách hàng bằng phương pháp fine-tuned model LLaMA 3.2 và tích hợp kỹ thuật RAG tối ưu truy vấn ứng dụng tại nhà hàng Kimochi Sushi," Báo cáo dự án nghiên cứu, [năm thực hiện].
+
+\[3\] Z. Ji *et al.*, "Survey of hallucination in natural language generation," *ACM Computing Surveys*, vol. 55, no. 12, pp. 1–38, 2023, doi: 10.1145/3571730.
+
+\[4\] R. Wirth and J. Hipp, "CRISP-DM: Towards a standard process model for data mining," in *Proc. 4th Int. Conf. Practical Applications of Knowledge Discovery and Data Mining*, 2000, pp. 29–39.
+
+\[5\] A. Vaswani *et al.*, "Attention is all you need," in *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 30, 2017.
+
+\[6\] L. Ouyang *et al.*, "Training language models to follow instructions with human feedback," in *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 35, 2022.
+
+\[7\] Qwen Team, "Qwen2.5 technical report," arXiv preprint arXiv:2412.15115, 2024.
+
+\[8\] A. Grattafiori *et al.*, "The Llama 3 herd of models," arXiv preprint arXiv:2407.21783, 2024.
+
+\[9\] Meta AI, "Llama 3.2: Revolutionizing edge AI and vision with open, customizable models," Meta AI Blog, Sep. 25, 2024. [Online]. Available: https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/
+
+\[10\] E. J. Hu *et al.*, "LoRA: Low-rank adaptation of large language models," in *Proc. Int. Conf. Learning Representations (ICLR)*, 2022.
+
+\[11\] T. Dettmers, A. Pagnoni, A. Holtzman, and L. Zettlemoyer, "QLoRA: Efficient finetuning of quantized LLMs," in *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 36, 2023.
+
+\[12\] P. Lewis *et al.*, "Retrieval-augmented generation for knowledge-intensive NLP tasks," in *Advances in Neural Information Processing Systems (NeurIPS)*, vol. 33, 2020, pp. 9459–9474.
+
+\[13\] Y. Gao *et al.*, "Retrieval-augmented generation for large language models: A survey," arXiv preprint arXiv:2312.10997, 2023.
+
+\[14\] S. Robertson and H. Zaragoza, "The probabilistic relevance framework: BM25 and beyond," *Foundations and Trends in Information Retrieval*, vol. 3, no. 4, pp. 333–389, 2009.
+
+\[15\] V. Karpukhin *et al.*, "Dense passage retrieval for open-domain question answering," in *Proc. Conf. Empirical Methods in Natural Language Processing (EMNLP)*, 2020, pp. 6769–6781.
+
+\[16\] J. Chen, S. Xiao, P. Zhang, K. Luo, D. Lian, and Z. Liu, "BGE M3-Embedding: Multi-lingual, multi-functionality, multi-granularity text embeddings through self-knowledge distillation," arXiv preprint arXiv:2402.03216, 2024.
+
+\[17\] G. V. Cormack, C. L. A. Clarke, and S. Büttcher, "Reciprocal rank fusion outperforms Condorcet and individual rank learning methods," in *Proc. 32nd Int. ACM SIGIR Conf. Research and Development in Information Retrieval*, 2009, pp. 758–759.
+
+\[18\] R. Nogueira and K. Cho, "Passage re-ranking with BERT," arXiv preprint arXiv:1901.04085, 2019.
+
+\[19\] T. Zhang *et al.*, "RAFT: Adapting language model to domain specific RAG," arXiv preprint arXiv:2403.10131, 2024.
+
+\[20\] S. Yao *et al.*, "ReAct: Synergizing reasoning and acting in language models," in *Proc. Int. Conf. Learning Representations (ICLR)*, 2023.
+
+\[21\] N. Rajkumar, R. Li, and D. Bahdanau, "Evaluating the text-to-SQL capabilities of large language models," arXiv preprint arXiv:2204.00498, 2022.
+
+\[22\] S. Es, J. James, L. Espinosa-Anke, and S. Schockaert, "RAGAS: Automated evaluation of retrieval augmented generation," in *Proc. 18th Conf. European Chapter of the Association for Computational Linguistics: System Demonstrations (EACL)*, 2024, pp. 150–158.
+
+\[23\] L. Zheng *et al.*, "Judging LLM-as-a-judge with MT-Bench and Chatbot Arena," in *Advances in Neural Information Processing Systems (NeurIPS) Datasets and Benchmarks Track*, vol. 36, 2023.
+:::
