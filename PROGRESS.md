@@ -2,6 +2,11 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-04 — Sửa CUDA OOM khi fine-tune LoRA 16-bit trên T4
+- Lô 4 × 1.024 token với từ vựng Qwen ~152k → logits + bản sao TRL tính accuracy vượt 16 GB. Đổi mặc định 2 × tích lũy 8
+  (lô hiệu dụng giữ 16); `llm.train` tự thử lại 1 × 16 khi gặp `OutOfMemoryError`; eval batch = train batch;
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. `result.json` ghi thêm `per_device_bs`, `grad_accum`. Sửa mô tả cấu hình Phần 4.
+
 ### 2026-11-04 — Sửa lỗi chạy NB2 trên Kaggle (báo từ lần chạy thật)
 - `bitsandbytes 0.47.0` không có bản build CUDA 13.0 (Kaggle đã lên PyTorch CUDA 13) → ghim `0.48.2` (có `libbitsandbytes_cuda130.so`).
 - "GPU T4 x2" → Trainer bật DataParallel, mô hình nạp cố định cuda:0 → TRL lỗi `size of tensor a (4) must match (8)` ở bước tính

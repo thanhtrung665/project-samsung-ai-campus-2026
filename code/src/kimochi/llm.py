@@ -118,8 +118,11 @@ def sft_dataset(root: Path, split: str, frac: float = 1.0, seed: int = 42, data_
 
 def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, lr: float = 2e-4, r: int = 16,
           epochs: float = 2, max_steps: int = -1, data_frac: float = 1.0, max_len: int = 1024, eval_steps: int = 50,
-          per_device_bs: int = 4, grad_accum: int = 4, extra_callbacks=(), report_to="none", data_dir: str = "splits_v2") -> dict:
-    """Huấn luyện 1 ô ma trận {model} × {LoRA fp16, QLoRA nf4}. Trả về chỉ số tài nguyên + lịch sử loss."""
+          per_device_bs: int = 2, grad_accum: int = 8, extra_callbacks=(), report_to="none", data_dir: str = "splits_v2") -> dict:
+    """Huấn luyện 1 ô ma trận {model} × {LoRA fp16, QLoRA nf4 / int8}. Trả về chỉ số tài nguyên + lịch sử loss.
+
+    Lô hiệu dụng = per_device_bs × grad_accum = 16 cố định cho mọi ô (so sánh công bằng). T4 16 GB: logits của Qwen (từ vựng
+    ~152k) rất lớn → mặc định 2 × 8; nếu vẫn hết bộ nhớ (CUDA OOM) tự thử lại 1 × 16 — cùng lô hiệu dụng, chỉ chậm hơn."""
     torch = _torch()
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
     from transformers import EarlyStoppingCallback, set_seed
@@ -128,43 +131,57 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
     if torch.cuda.device_count() > 1:
         raise RuntimeError("Đang thấy nhiều GPU → Trainer sẽ dùng DataParallel và lỗi lệch kích thước lô. Đặt "
                            "os.environ['CUDA_VISIBLE_DEVICES'] = '0' TRƯỚC khi import torch (Restart session rồi chạy lại từ đầu).")
-    set_seed(seed)
-    model, tok, name = load(model_key, quant, for_training=True)
-    if quant in ("nf4", "int8"):
-        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
-    else:
-        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
-        model.enable_input_require_grads()
-    model = get_peft_model(model, LoraConfig(r=r, lora_alpha=2 * r, lora_dropout=0.05, target_modules=TARGET_MODULES,
-                                             task_type="CAUSAL_LM"))
-    for p in model.parameters():
-        if p.requires_grad:
-            p.data = p.data.float()
-    n_train = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-    cfg = SFTConfig(
-        output_dir=out_dir, seed=seed, learning_rate=lr, num_train_epochs=epochs, max_steps=max_steps,
-        per_device_train_batch_size=per_device_bs, per_device_eval_batch_size=8, gradient_accumulation_steps=grad_accum,
-        lr_scheduler_type="cosine", warmup_ratio=0.03, weight_decay=0.0, fp16=True, bf16=False,
-        optim="paged_adamw_8bit" if quant in ("nf4", "int8") else "adamw_torch",
-        logging_steps=10, eval_strategy="steps", eval_steps=eval_steps, save_strategy="steps", save_steps=eval_steps,
-        save_total_limit=1, load_best_model_at_end=True, metric_for_best_model="eval_loss", greater_is_better=False,
-        max_length=max_len, completion_only_loss=True, packing=False, report_to=report_to, gradient_checkpointing=False,
-    )
-    trainer = SFTTrainer(model=model, args=cfg, processing_class=tok,
-                         train_dataset=sft_dataset(root, "train", data_frac, seed, data_dir),
-                         eval_dataset=sft_dataset(root, "val", data_dir=data_dir),
-                         callbacks=[EarlyStoppingCallback(early_stopping_patience=3), *extra_callbacks])
-    torch.cuda.reset_peak_memory_stats()
-    t0 = time.time()
-    trainer.train()
+    train_ds = sft_dataset(root, "train", data_frac, seed, data_dir)
+    eval_ds = sft_dataset(root, "val", data_dir=data_dir)
+    effective = per_device_bs * grad_accum
+    attempts = [(b, effective // b) for b in (per_device_bs, 1) if effective % b == 0]
+    attempts = list(dict.fromkeys(attempts))
+    for i, (bs, ga) in enumerate(attempts):
+        trainer = model = None
+        try:
+            set_seed(seed)
+            model, tok, name = load(model_key, quant, for_training=True)
+            if quant in ("nf4", "int8"):
+                model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+            else:
+                model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+                model.enable_input_require_grads()
+            model = get_peft_model(model, LoraConfig(r=r, lora_alpha=2 * r, lora_dropout=0.05, target_modules=TARGET_MODULES,
+                                                     task_type="CAUSAL_LM"))
+            for p in model.parameters():
+                if p.requires_grad:
+                    p.data = p.data.float()
+            n_train = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            cfg = SFTConfig(
+                output_dir=out_dir, seed=seed, learning_rate=lr, num_train_epochs=epochs, max_steps=max_steps,
+                per_device_train_batch_size=bs, per_device_eval_batch_size=bs, gradient_accumulation_steps=ga,
+                lr_scheduler_type="cosine", warmup_ratio=0.03, weight_decay=0.0, fp16=True, bf16=False,
+                optim="paged_adamw_8bit" if quant in ("nf4", "int8") else "adamw_torch",
+                logging_steps=10, eval_strategy="steps", eval_steps=eval_steps, save_strategy="steps", save_steps=eval_steps,
+                save_total_limit=1, load_best_model_at_end=True, metric_for_best_model="eval_loss", greater_is_better=False,
+                max_length=max_len, completion_only_loss=True, packing=False, report_to=report_to, gradient_checkpointing=False,
+            )
+            trainer = SFTTrainer(model=model, args=cfg, processing_class=tok, train_dataset=train_ds, eval_dataset=eval_ds,
+                                 callbacks=[EarlyStoppingCallback(early_stopping_patience=3), *extra_callbacks])
+            torch.cuda.reset_peak_memory_stats()
+            t0 = time.time()
+            trainer.train()
+            break
+        except torch.cuda.OutOfMemoryError:
+            if i == len(attempts) - 1:
+                raise
+            print(f"⚠ Hết bộ nhớ GPU với lô {bs} × tích lũy {ga} → thử lại lô {attempts[i + 1][0]} × {attempts[i + 1][1]}")
+            del trainer, model
+            free()
+            import shutil
+            shutil.rmtree(out_dir, ignore_errors=True)
     minutes = (time.time() - t0) / 60
     ev = trainer.evaluate()
     trainer.model.save_pretrained(out_dir + "/adapter")
     tok.save_pretrained(out_dir + "/adapter")
     hist = trainer.state.log_history
     res = {"model": model_key, "base": name, "quant": quant, "seed": seed, "lr": lr, "r": r, "data_frac": data_frac,
-           "data": data_dir, "trainable_params": n_train, "train_minutes": round(minutes, 1),
+           "data": data_dir, "per_device_bs": bs, "grad_accum": ga, "trainable_params": n_train, "train_minutes": round(minutes, 1),
            "peak_vram_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2), "eval_loss": ev["eval_loss"],
            "eval_ppl": math.exp(ev["eval_loss"]), "steps": trainer.state.global_step, "adapter": out_dir + "/adapter"}
     Path(out_dir, "history.json").write_text(json.dumps(hist))

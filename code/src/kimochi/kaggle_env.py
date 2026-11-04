@@ -16,6 +16,7 @@ from pathlib import Path
 # → lỗi lệch kích thước lô ("size of tensor a (4) must match ... (8)"). Phải đặt TRƯỚC khi import torch.
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
 # Không để transformers nạp TensorFlow/JAX (bản TF trên Kaggle không khớp CUDA 13 → in "Could not find cuda drivers"; vô hại).
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")   # giảm phân mảnh bộ nhớ GPU
 os.environ.setdefault("USE_TF", "0")
 os.environ.setdefault("USE_JAX", "0")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")

@@ -254,7 +254,8 @@ KAGGLE_SETUP = r'''
 NB2_ENV = r'''
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'   # chỉ dùng 1 GPU (xem kaggle_env.py) — phải đặt trước khi import torch
-os.environ.update({'USE_TF': '0', 'USE_JAX': '0', 'TF_CPP_MIN_LOG_LEVEL': '3'})   # không nạp TensorFlow (chỉ dùng PyTorch)
+os.environ.update({'USE_TF': '0', 'USE_JAX': '0', 'TF_CPP_MIN_LOG_LEVEL': '3',
+                   'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'})   # giảm phân mảnh bộ nhớ GPU   # không nạp TensorFlow (chỉ dùng PyTorch)
 import sys, glob, json, time, shutil, pathlib
 cands = glob.glob('/kaggle/input/**/code/src', recursive=True)
 if cands:                       # Kaggle: chép repo (dataset chỉ đọc) sang /kaggle/working/repo
