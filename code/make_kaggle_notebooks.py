@@ -12,7 +12,7 @@ HERE = Path(__file__).parent
 OUT = HERE.parent / 'notebooks' / 'kaggle'
 
 INSTALL = """%%capture
-!pip install -q "transformers==4.56.2" "trl==0.21.0" "peft==0.17.0" "bitsandbytes==0.47.0" "accelerate>=1.4" "datasets>=3.0" rank-bm25 optuna"""
+!pip install -q "transformers==4.56.2" "trl==0.21.0" "peft==0.17.0" "bitsandbytes==0.48.2" "accelerate>=1.4" "datasets>=3.0" rank-bm25 optuna"""
 SETUP = """import sys, glob, json, os, time
 sys.path.insert(0, glob.glob('/kaggle/input/**/code/src', recursive=True)[0])
 from kimochi.kaggle_env import setup, gpu_info

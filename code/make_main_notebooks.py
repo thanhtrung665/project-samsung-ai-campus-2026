@@ -248,11 +248,14 @@ print('✓ Dữ liệu sẵn sàng cho NB2')
 # ================================================================================================ NB2
 KAGGLE_SETUP = r'''
 %%capture
-!pip install -q "transformers==4.56.2" "trl==0.21.0" "peft==0.17.0" "bitsandbytes==0.47.0" "accelerate>=1.4" "datasets>=3.0" \
+!pip install -q "transformers==4.56.2" "trl==0.21.0" "peft==0.17.0" "bitsandbytes==0.48.2" "accelerate>=1.4" "datasets>=3.0" \
                 rank-bm25 "sentence-transformers>=3.0" optuna gradio==5.49.1 google-genai
 '''
 NB2_ENV = r'''
-import sys, os, glob, json, time, shutil, pathlib
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'   # chỉ dùng 1 GPU (xem kaggle_env.py) — phải đặt trước khi import torch
+os.environ.update({'USE_TF': '0', 'USE_JAX': '0', 'TF_CPP_MIN_LOG_LEVEL': '3'})   # không nạp TensorFlow (chỉ dùng PyTorch)
+import sys, glob, json, time, shutil, pathlib
 cands = glob.glob('/kaggle/input/**/code/src', recursive=True)
 if cands:                       # Kaggle: chép repo (dataset chỉ đọc) sang /kaggle/working/repo
     sys.path.insert(0, cands[0])
@@ -688,5 +691,9 @@ def write(name, cells, kaggle=False):
 
 
 if __name__ == "__main__":
-    write("NB1_data_pipeline.ipynb", NB1)
-    write("NB2_finetune_rag_mvp.ipynb", NB2, kaggle=True)
+    import sys
+    which = sys.argv[1:] or ["NB1", "NB2"]          # vd: python code/make_main_notebooks.py NB2  (không ghi đè NB1 đã chạy)
+    if "NB1" in which:
+        write("NB1_data_pipeline.ipynb", NB1)
+    if "NB2" in which:
+        write("NB2_finetune_rag_mvp.ipynb", NB2, kaggle=True)

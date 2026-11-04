@@ -2,6 +2,13 @@
 
 ## Phần I. Nhật ký
 
+### 2026-11-04 — Sửa lỗi chạy NB2 trên Kaggle (báo từ lần chạy thật)
+- `bitsandbytes 0.47.0` không có bản build CUDA 13.0 (Kaggle đã lên PyTorch CUDA 13) → ghim `0.48.2` (có `libbitsandbytes_cuda130.so`).
+- "GPU T4 x2" → Trainer bật DataParallel, mô hình nạp cố định cuda:0 → TRL lỗi `size of tensor a (4) must match (8)` ở bước tính
+  accuracy. Sửa: `CUDA_VISIBLE_DEVICES=0` (ô môi trường NB2 + `kaggle_env`), `llm.train` báo lỗi rõ nếu còn thấy > 1 GPU.
+- `kaggle_env.setup` luôn làm mới `code/ data/ demo/` từ dataset (trước đây giữ bản cũ nếu `/kaggle/working/repo` đã tồn tại),
+  giữ nguyên `results/`.
+
 ### 2026-11-04 — T19 gộp notebook
 - Thư mục `notebooks/`: **NB1_data_pipeline** (CPU, 25 ô, chạy sạch 46 s: nạp → KB → chất lượng → nhãn → split → EDA → dữ liệu v2 →
   kiểm tra sẵn sàng → `data/MANIFEST.json`) và **NB2_finetune_rag_mvp** (GPU Kaggle, 38 ô: nhận dữ liệu kiểm manifest → Optuna tùy

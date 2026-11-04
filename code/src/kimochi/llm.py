@@ -1,6 +1,6 @@
 """Nạp model, sinh câu trả lời theo lô và huấn luyện LoRA / QLoRA (chạy trên GPU Kaggle T4).
 
-Phiên bản đã kiểm: transformers 4.56, trl 0.21, peft 0.17, bitsandbytes 0.47.
+Phiên bản ghim: transformers 4.56, trl 0.21, peft 0.17, bitsandbytes 0.48.2 (có bản build CUDA 13.0 cho Kaggle).
 T4 không hỗ trợ bf16 → dùng fp16; tham số LoRA được ép về fp32 để GradScaler của AMP hoạt động.
 """
 from __future__ import annotations
@@ -49,7 +49,7 @@ def load(model_key: str, quant: str = "fp16", adapter: str | None = None, for_tr
         tok = AutoTokenizer.from_pretrained(name)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
-    kw = {"torch_dtype": torch.float16, "device_map": {"": 0}}
+    kw = {"dtype": torch.float16, "device_map": {"": 0}}
     if quant == "nf4":
         kw["quantization_config"] = bnb_config()
     elif quant == "int8":
@@ -125,6 +125,9 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
     from transformers import EarlyStoppingCallback, set_seed
     from trl import SFTConfig, SFTTrainer
 
+    if torch.cuda.device_count() > 1:
+        raise RuntimeError("Đang thấy nhiều GPU → Trainer sẽ dùng DataParallel và lỗi lệch kích thước lô. Đặt "
+                           "os.environ['CUDA_VISIBLE_DEVICES'] = '0' TRƯỚC khi import torch (Restart session rồi chạy lại từ đầu).")
     set_seed(seed)
     model, tok, name = load(model_key, quant, for_training=True)
     if quant in ("nf4", "int8"):
@@ -193,7 +196,7 @@ def export_merged(model_key: str, adapter: str, out_dir: str) -> dict:
     except OSError:
         name = LLAMA_MIRROR
         tok = AutoTokenizer.from_pretrained(name)
-    base = AutoModelForCausalLM.from_pretrained(name, torch_dtype=torch.float16, device_map={"": 0})
+    base = AutoModelForCausalLM.from_pretrained(name, dtype=torch.float16, device_map={"": 0})
     merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
     merged.save_pretrained(out_dir, safe_serialization=True, max_shard_size="2GB")
     tok.save_pretrained(out_dir)
