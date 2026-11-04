@@ -12,6 +12,10 @@ import shutil
 import sys
 from pathlib import Path
 
+# Notebook chạy trên 1 GPU: với "GPU T4 x2", Trainer tự bật DataParallel trong khi mô hình nạp cố định lên cuda:0
+# → lỗi lệch kích thước lô ("size of tensor a (4) must match ... (8)"). Phải đặt TRƯỚC khi import torch.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
 WORK = Path("/kaggle/working/repo")
 
 
@@ -24,8 +28,14 @@ def setup(secrets=("HF_TOKEN", "GEMINI_API_KEY")) -> Path:
         root = Path(__file__).resolve().parents[3]
     else:
         src = next(Path(p).parents[2] for p in glob.glob("/kaggle/input/**/code/src/kimochi", recursive=True))
+        ign = shutil.ignore_patterns("*.ipynb", "docs", "*.pdf", "__pycache__")
         if not WORK.exists():
-            shutil.copytree(src, WORK, ignore=shutil.ignore_patterns("*.ipynb", "docs", "*.pdf"))
+            shutil.copytree(src, WORK, ignore=ign)
+        else:   # luôn làm mới code / dữ liệu / demo từ dataset (bản sửa mới có hiệu lực), giữ nguyên results/ đã sinh
+            for sub in ("code", "data", "demo"):
+                if (src / sub).exists():
+                    shutil.rmtree(WORK / sub, ignore_errors=True)
+                    shutil.copytree(src / sub, WORK / sub, ignore=ign)
         root = WORK
         try:
             from kaggle_secrets import UserSecretsClient

@@ -1,6 +1,6 @@
 """Nạp model, sinh câu trả lời theo lô và huấn luyện LoRA / QLoRA (chạy trên GPU Kaggle T4).
 
-Phiên bản đã kiểm: transformers 4.56, trl 0.21, peft 0.17, bitsandbytes 0.47.
+Phiên bản ghim: transformers 4.56, trl 0.21, peft 0.17, bitsandbytes 0.48.2 (có bản build CUDA 13.0 cho Kaggle).
 T4 không hỗ trợ bf16 → dùng fp16; tham số LoRA được ép về fp32 để GradScaler của AMP hoạt động.
 """
 from __future__ import annotations
@@ -125,6 +125,9 @@ def train(root: Path, model_key: str, quant: str, out_dir: str, seed: int = 42, 
     from transformers import EarlyStoppingCallback, set_seed
     from trl import SFTConfig, SFTTrainer
 
+    if torch.cuda.device_count() > 1:
+        raise RuntimeError("Đang thấy nhiều GPU → Trainer sẽ dùng DataParallel và lỗi lệch kích thước lô. Đặt "
+                           "os.environ['CUDA_VISIBLE_DEVICES'] = '0' TRƯỚC khi import torch (Restart session rồi chạy lại từ đầu).")
     set_seed(seed)
     model, tok, name = load(model_key, quant, for_training=True)
     if quant in ("nf4", "int8"):
