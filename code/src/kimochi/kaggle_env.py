@@ -15,6 +15,10 @@ from pathlib import Path
 # Notebook chạy trên 1 GPU: với "GPU T4 x2", Trainer tự bật DataParallel trong khi mô hình nạp cố định lên cuda:0
 # → lỗi lệch kích thước lô ("size of tensor a (4) must match ... (8)"). Phải đặt TRƯỚC khi import torch.
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+# Không để transformers nạp TensorFlow/JAX (bản TF trên Kaggle không khớp CUDA 13 → in "Could not find cuda drivers"; vô hại).
+os.environ.setdefault("USE_TF", "0")
+os.environ.setdefault("USE_JAX", "0")
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
 WORK = Path("/kaggle/working/repo")
 

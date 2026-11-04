@@ -49,7 +49,7 @@ def load(model_key: str, quant: str = "fp16", adapter: str | None = None, for_tr
         tok = AutoTokenizer.from_pretrained(name)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
-    kw = {"torch_dtype": torch.float16, "device_map": {"": 0}}
+    kw = {"dtype": torch.float16, "device_map": {"": 0}}
     if quant == "nf4":
         kw["quantization_config"] = bnb_config()
     elif quant == "int8":
@@ -196,7 +196,7 @@ def export_merged(model_key: str, adapter: str, out_dir: str) -> dict:
     except OSError:
         name = LLAMA_MIRROR
         tok = AutoTokenizer.from_pretrained(name)
-    base = AutoModelForCausalLM.from_pretrained(name, torch_dtype=torch.float16, device_map={"": 0})
+    base = AutoModelForCausalLM.from_pretrained(name, dtype=torch.float16, device_map={"": 0})
     merged = PeftModel.from_pretrained(base, adapter).merge_and_unload()
     merged.save_pretrained(out_dir, safe_serialization=True, max_shard_size="2GB")
     tok.save_pretrained(out_dir)
