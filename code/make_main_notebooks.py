@@ -308,14 +308,16 @@ RUN_OPTUNA, N_TRIALS = False, 6                               # True: dò r, lr 
 RUN_BASELINE = True                                           # B0 zero-shot của mô hình gốc để so sánh
 N_EVAL = None                                                 # None = toàn bộ tập test; 150 để chạy thử nhanh
 RUN_QUICK_DEMO = False                                        # §6: mở demo nhanh (không chặn notebook)
-RUN_MVP_DEMO = True                                           # §10
+RUN_MVP_DEMO = False                                          # §10 — CHỈ bật khi chạy tương tác (ô demo chạy mãi, tốn GPU)
 HF_USER = None                                                # vd 'thanhtrung665' → đẩy adapter + mô hình gộp lên HF Hub (private)
 RESUME_GLOB = '/kaggle/input/**/runs/*/result.json'           # kết quả huấn luyện phiên trước (nếu có)
 for p in glob.glob(RESUME_GLOB, recursive=True):              # nạp lại ô đã huấn luyện
     src = pathlib.Path(p).parent
     if not (RUNS / src.name).exists():
         shutil.copytree(src, RUNS / src.name, ignore=shutil.ignore_patterns('checkpoint-*'))
-print('Ô đã có:', sorted(x.name for x in RUNS.iterdir()))
+for p in glob.glob('/kaggle/input/**/repo/results', recursive=True):   # kết quả + câu trả lời đã sinh của phiên trước
+    shutil.copytree(p, RES, dirs_exist_ok=True)
+print('Ô đã có:', sorted(x.name for x in RUNS.iterdir()), '| file kết quả:', len(list(RES.rglob('*.*'))))
 '''),
 
     md("## 1. Nhận dữ liệu\nKiểm tra md5 so với `data/MANIFEST.json` do NB1 ghi — bảo đảm huấn luyện đúng phiên bản dữ liệu."),
