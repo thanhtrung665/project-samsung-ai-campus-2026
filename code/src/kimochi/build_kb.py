@@ -140,7 +140,7 @@ def load_raw() -> pd.DataFrame:
     df["cand"] = df["Domain"].map(item_from_domain).map(clean_name)
     n_dom = df.groupby("cand")["Domain"].nunique()
     canon = sorted({c for c, k in n_dom.items() if k >= 2 and DISH_WORD.search(c) and not NOT_DISH.search(c)},
-                   key=lambda c: -len(c))
+                   key=lambda c: (-len(c), c))
     canon_f = [(fold(c), c) for c in canon]
 
     def assign(domain: str) -> str | None:
@@ -265,6 +265,27 @@ def cross_check_prices(df: pd.DataFrame, menu: pd.DataFrame) -> dict:
     return out
 
 
+CHUNK_CHARS = 600
+
+
+def chunk_docs(docs: list[dict]) -> list[dict]:
+    """Cắt mỗi tài liệu thành chunk ≤ CHUNK_CHARS theo ranh giới câu trả lời (không cắt giữa câu). Chunk kế thừa metadata."""
+    chunks = []
+    for d in docs:
+        parts = [p.strip() for p in re.split(r"(?<=[.!?…🥰😋✨🎉🫶🏻💸])\s+(?=Dạ|Hiện|Khách|Món|Tụi|Mình|Bên)", d["text"]) if p.strip()]
+        buf, k = "", 0
+        for p in parts + [None]:
+            if p is None or (buf and len(buf) + len(p) > CHUNK_CHARS):
+                if buf:
+                    meta = {kk: v for kk, v in d.items() if kk not in ("text", "doc_id")}
+                    chunks.append({"chunk_id": f"{d['doc_id']}#c{k}", "doc_id": d["doc_id"], **meta, "text": buf.strip()})
+                    k += 1
+                buf = ""
+            if p is not None:
+                buf += " " + p
+    return chunks
+
+
 def main() -> dict:
     KB_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(exist_ok=True)
@@ -275,6 +296,10 @@ def main() -> dict:
     with open(KB_DIR / "docs.jsonl", "w", encoding="utf-8") as f:
         for d in docs:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
+    chunks = chunk_docs(docs)
+    with open(KB_DIR / "chunks.jsonl", "w", encoding="utf-8") as f:
+        for c in chunks:
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
     pd.DataFrame(BRANCHES).to_csv(KB_DIR / "branches.csv", index=False, encoding="utf-8-sig")
     build_db(menu)
     q = {
@@ -287,6 +312,7 @@ def main() -> dict:
         "price_conflicts": conflicts,
         "items_price_mismatch_in_other_answers": len(xc := cross_check_prices(df, menu)),
         "price_mismatch_detail": xc,
+        "chunks": len(chunks),
         "docs_menu": sum(d["type"] == "menu" for d in docs),
         "docs_policy": sum(d["type"] == "policy" for d in docs),
         "category_counts": menu["category"].value_counts().to_dict(),

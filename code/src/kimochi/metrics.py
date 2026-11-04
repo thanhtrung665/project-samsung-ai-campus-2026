@@ -75,7 +75,9 @@ def summarize(scored: pd.DataFrame) -> dict:
 
 
 def bootstrap_ci(x, n=1000, seed=0, alpha=.05):
-    x = np.asarray(pd.Series(x).dropna(), dtype=float)
+    x = np.asarray(pd.Series(x, dtype=float).dropna(), dtype=float)
+    if len(x) == 0:
+        return float("nan"), float("nan"), float("nan")
     rng = np.random.default_rng(seed)
     means = rng.choice(x, (n, len(x))).mean(1)
     return float(x.mean()), float(np.quantile(means, alpha / 2)), float(np.quantile(means, 1 - alpha / 2))
@@ -86,6 +88,8 @@ def paired_bootstrap(a, b, n=1000, seed=0):
     a, b = np.asarray(a, float), np.asarray(b, float)
     m = ~(np.isnan(a) | np.isnan(b))
     a, b = a[m], b[m]
+    if len(a) == 0:
+        return {"diff": float("nan"), "ci_low": float("nan"), "ci_high": float("nan"), "p_not_better": float("nan")}
     rng = np.random.default_rng(seed)
     idx = rng.integers(0, len(a), (n, len(a)))
     d = a[idx].mean(1) - b[idx].mean(1)

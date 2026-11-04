@@ -7,7 +7,11 @@ Mỗi dòng test_gold / test_adv:
     {"id": "gold-001", "query": "...", "reference": "câu trả lời chuẩn", "intent": "price_query",
      "gold_doc_ids": ["doc_menu_M012"], "gold_sql": null, "author": "Trung"}
 test_adv thêm "attack": "prompt_injection" | "out_of_scope" | "no_answer_in_kb".
-scenarios.jsonl: {"id": "sc-01", "turns": ["...", "..."], "expected": {"reservation": {...}} , "author": "..."}
+scenarios.jsonl (chi tiết: code/src/kimochi/agent_eval.py):
+    {"id": "sc-01", "author": "...", "turns": ["đặt bàn 4 người 19h ngày 15/11 gv", "Minh 0901234567", "ok"],
+     "expected": {"reservation": {"branch": "GV", "party_size": 4, "start_at": "2026-11-15 19:00", "phone": "0901234567"},
+                  "confirm_turn": 2, "must_not_call": []}}
+    reservation = null nếu kịch bản KHÔNG được tạo đặt bàn (khách đổi ý, ngoài giờ, hết bàn…).
 """
 import hashlib
 import json

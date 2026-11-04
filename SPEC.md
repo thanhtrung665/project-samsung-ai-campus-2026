@@ -105,18 +105,20 @@ Trạng thái: ✅ xong · 🟡 đang làm / một phần · ⬜ chưa làm. **�
 | T04 | 03/11 | Dựng repo: `code/`, `results/`, `images/`, `requirements.txt`, `.gitignore`, `.env.example`; render thử PDF | P0 | PDF render được | ✅ 03/11 |
 | T05 | 03/11 | Trích KB: menu/giá/dị ứng → `kb/menu.csv`, `kimochi.db` (SQLite schema + seed), policies/FAQ; data dictionary | P0 | `01_build_kb.ipynb` chạy; bảng data dictionary | ✅ 03/11 (106 món, 74 có giá) |
 | T06 | 03–04/11 | Viết tay & đóng băng `test_gold` (150) + `test_adv` (80) + 30 kịch bản đặt bàn; SHA-256 | P0 | `data/splits/CHECKSUMS.txt` | 🟡 công cụ `code/freeze_tests.py` xong — **nhóm phải tự viết** |
-| T07 | 04/11 | Chuyển đổi 6.355 mẫu → `messages`+`meta`, gán intent, bổ sung RAFT/tool-call/từ chối (LLM thầy), lọc, split theo group | P0 | `02_prepare_sft.ipynb`, train/val/test_synth.jsonl, phễu lọc | 🟡 chuyển đổi + split xong (5.084/565/562); còn RAFT/tool-call/từ chối |
+| T07 | 04/11 | Chuyển đổi 6.355 mẫu → `messages`+`meta`, gán intent, bổ sung RAFT/tool-call/từ chối (LLM thầy), lọc, split theo group | P0 | `02_prepare_sft.ipynb`, train/val/test_synth.jsonl, phễu lọc | ✅ (thay bằng T07b cho dữ liệu huấn luyện; split v1 giữ làm tập test) |
+| T07b | 03/11 | Bộ dữ liệu SFT v2: làm sạch, giá qua công cụ SQL, RAFT, mẫu khuôn (đặt bàn nhiều lượt, từ chối, khiếu nại), 3 system prompt, dataset card | P0 | `data/splits_v2/` + README, `05_prepare_sft_v2.ipynb` | ✅ 03/11 (4.980 / 580 hội thoại) |
 | T08 | 04–05/11 | EDA 6–8 biểu đồ + nhận xét kinh doanh; viết **Phần 3** | P0 | `03_eda.ipynb`, §3 `.qmd` | ✅ 03/11 (7 hình; token-length chạy trên Colab) |
 | T09 | 05/11 | Hybrid RAG + ablation R1–R5 (Recall@5, MRR, nDCG@5) | P0 | `04_rag.ipynb`, `results/retrieval_test_synth.csv` | 🟡 sparse xong (BM25+lọc R@5 0,951); dense/reranker chạy trên Colab |
 | T10 | 05/11 | Baseline B0/B1/B2 cả 2 model trên test_gold | P0 | `results/baseline.csv` | 🟡 notebook `code/kaggle/K2` sẵn sàng — chờ chạy GPU |
 | T11 | 05–06/11 | Optuna 8 trial Qwen QLoRA; train M1–M4 (1 seed bắt buộc, 3 seed nếu kịp); learning curve | P0 | 4 adapter trên HF Hub, `results/train_matrix.csv`, hình loss | 🟡 notebook K3, K4 sẵn sàng — chờ chạy GPU |
-| T12 | 07/11 | Agent (sql/rag/handoff) gắn M*; chạy kịch bản; confusion matrix công cụ; viết **Phần 4** | P0 | `06_agent.ipynb`, §4 `.qmd` | ⬜ |
-| T13 | 07–08/11 | Đánh giá toàn diện (judge hiệu chỉnh, RAGAS, fact-EM, bootstrap), XAI, 10 ca lỗi, đạo đức; viết **Phần 5** | P0 | `07_eval.ipynb`, §5 `.qmd` | ⬜ |
-| T14 | 08/11 | Prototype Gradio + deploy HF Space / video 2–3 phút; viết **Phần 6** | P0 | link demo trong `demo/README.md` | ⬜ |
+| T12 | 07/11 | Agent (sql/rag/handoff) gắn M* — `tools.py` + `agent.py` đã có (7 công cụ SQLite, vòng lặp tool_call); chạy kịch bản; confusion matrix công cụ; viết **Phần 4** | P0 | `06_agent.ipynb`, §4 `.qmd` | 🟡 `agent_eval.py` + `K6_agent_eval.ipynb` xong (kiểm thử CPU); chờ chạy GPU + `scenarios.jsonl` viết tay |
+| T13 | 07–08/11 | Đánh giá toàn diện (judge hiệu chỉnh, RAGAS, fact-EM, bootstrap), XAI, 10 ca lỗi, đạo đức; viết **Phần 5** | P0 | `07_eval.ipynb`, §5 `.qmd` | 🟡 notebook K5 + khung Phần 5 trong `.qmd` (bảng tự điền từ `results/`); chờ GPU |
+| T14 | 08/11 | Prototype Gradio + deploy HF Space / video 2–3 phút; viết **Phần 6** | P0 | link demo trong `demo/README.md` | 🟡 `demo/app.py` (Gradio, What-if giá) + K7 + kịch bản video; chờ adapter để quay video / Space |
 | T15 | 08–09/11 | Người dùng thật thử (5–10 người) + phiếu chấm | P1 (bonus) | bảng kết quả trong §6 | ⬜ |
-| T16 | 09/11 | Hoàn thiện: mục lục tự động, DM hình/bảng, placeholder bìa, bảng phân công, tuyên bố AI, TLTK đủ, ≤ 45 trang | P0 | PDF hoàn chỉnh | ⬜ |
-| T17 | 09/11 | Restart & Run All mọi notebook; đóng gói zip | P0 | zip đúng tên | ⬜ |
+| T16 | 09/11 | Hoàn thiện: mục lục tự động, DM hình/bảng, placeholder bìa, bảng phân công, tuyên bố AI, TLTK đủ, ≤ 45 trang | P0 | PDF hoàn chỉnh | 🟡 Phần 4–6 viết xong khung (34 trang); còn điền trang bìa, phân công, số liệu GPU |
+| T17 | 09/11 | Restart & Run All mọi notebook; đóng gói zip | P0 | zip đúng tên | 🟡 `code/make_submission.py` (kiểm tra rubric + zip) xong; chạy lần cuối 09/11 |
 | T18 | 10–11/11 | Đệm: soát rubric, Turnitin, nộp LMS trước 23:59 11/11 | P0 | Đã nộp | ⬜ |
+| T19 | 04/11 | Gộp notebook: thư mục `notebooks/`, NB1 (dữ liệu → sẵn sàng huấn luyện) + NB2 (LoRA/QLoRA → đánh giá → Hybrid-RAG → xuất mô hình → MVP) | P1 | NB1 chạy sạch; NB2 hợp lệ | ✅ 04/11 (NB2 chờ GPU) |
 
 **Thứ tự cắt khi trễ** (không cắt test_gold và hiệu chỉnh judge): 3 seed → 1 seed · Optuna 8 → 4 trial · bỏ text-to-SQL tự do
 (chỉ hàm tham số hóa) · MongoDB → JSON · M1–M4 → chỉ QLoRA cho cả 2 model + LoRA cho model tốt hơn · deploy Space → video.

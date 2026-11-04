@@ -34,7 +34,8 @@ def tokenize(text: str) -> list[str]:
 
 
 def load_docs() -> list[dict]:
-    return [json.loads(line) for line in open(KB / "docs.jsonl", encoding="utf-8")]
+    """Đơn vị truy xuất = chunk (≤ 600 ký tự); mỗi chunk mang doc_id của tài liệu cha."""
+    return [json.loads(line) for line in open(KB / "chunks.jsonl", encoding="utf-8")]
 
 
 def doc_text(d: dict) -> str:
@@ -49,15 +50,18 @@ class HybridRetriever:
 
     def __post_init__(self):
         texts = [doc_text(d) for d in self.docs]
-        self.ids = [d["doc_id"] for d in self.docs]
+        self.ids = [d["doc_id"] for d in self.docs]  # id tài liệu cha của từng chunk
         self.bm25 = BM25Okapi([tokenize(t) for t in texts])
         self.tfidf = TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), sublinear_tf=True).fit([fold(t) for t in texts])
         self.tfidf_m = self.tfidf.transform([fold(t) for t in texts])
         self.dense_m = None
         if self.dense_model is not None:
             self.dense_m = self.dense_model.encode(texts, normalize_embeddings=True, batch_size=16, show_progress_bar=False)
-        self.title_f = [(fold(d["title"]), i) for i, d in enumerate(self.docs) if d["type"] == "menu"]
-        self.title_f.sort(key=lambda x: -len(x[0]))
+        titles: dict[str, list[int]] = {}
+        for i, d in enumerate(self.docs):
+            if d["type"] == "menu":
+                titles.setdefault(fold(d["title"]), []).append(i)
+        self.title_f = sorted(titles.items(), key=lambda x: -len(x[0]))
 
     # ---------------------------------------------------------------- từng bộ truy xuất → thứ hạng chỉ số tài liệu
     def rank_bm25(self, q):
@@ -81,9 +85,10 @@ class HybridRetriever:
     def title_filter(self, q, ranking):
         """Lọc metadata: nếu câu hỏi nhắc đúng tên một món (so khớp bỏ dấu, tên dài nhất) → đẩy tài liệu món đó lên đầu."""
         fq = fold(q)
-        for t, i in self.title_f:
+        for t, idxs in self.title_f:
             if len(t) >= 6 and t in fq:
-                return np.concatenate([[i], ranking[ranking != i]])
+                first = [i for i in ranking if i in set(idxs)]  # các chunk của món đó, giữ thứ tự điểm
+                return np.concatenate([first, [i for i in ranking if i not in set(idxs)]]).astype(int)
         return ranking
 
     def rerank(self, q, ranking, top=20):
@@ -92,7 +97,18 @@ class HybridRetriever:
         return np.concatenate([head[np.argsort(-np.asarray(scores))], ranking[top:]])
 
     def search(self, q, config="hybrid_filter", k=5) -> list[str]:
-        return [self.ids[i] for i in self._rank(q, config)[:k]]
+        """Top-k id tài liệu cha (khử trùng) — dùng để đo Recall/MRR."""
+        out: list[str] = []
+        for i in self._rank(q, config):
+            if self.ids[i] not in out:
+                out.append(self.ids[i])
+                if len(out) == k:
+                    break
+        return out
+
+    def search_chunks(self, q, config="bm25_filter", k=3) -> list[dict]:
+        """Top-k chunk đưa vào ngữ cảnh LLM (dùng chung cho dữ liệu RAFT và lúc chạy thật)."""
+        return [self.docs[i] for i in self._rank(q, config)[:k]]
 
     def _rank(self, q, config):
         if config == "bm25":
@@ -172,3 +188,19 @@ def run(split="test_synth", use_models=True) -> pd.DataFrame:
 
 if __name__ == "__main__":
     print(run().round(3).to_string())
+
+
+def explain_bm25(r: HybridRetriever, q: str, top_terms: int = 6) -> dict:
+    """XAI cho bộ truy xuất: tách điểm BM25 của chunk hạng 1 thành đóng góp của từng token truy vấn
+    idf(t) · f(t,d)·(k1+1) / (f(t,d) + k1·(1 − b + b·|d|/avgdl)). Tổng các đóng góp = điểm BM25 của chunk."""
+    bm = r.bm25
+    i = int(r.rank_bm25(q)[0])
+    freqs, dl = bm.doc_freqs[i], bm.doc_len[i]
+    contrib = {}
+    for t in dict.fromkeys(tokenize(q)):
+        f = freqs.get(t, 0)
+        if f:
+            contrib[t] = bm.idf.get(t, 0) * f * (bm.k1 + 1) / (f + bm.k1 * (1 - bm.b + bm.b * dl / bm.avgdl))
+    terms = sorted(contrib.items(), key=lambda x: -x[1])
+    return {"chunk_id": r.docs[i]["chunk_id"], "title": r.docs[i]["title"], "score": float(sum(contrib.values())),
+            "bm25_score": float(bm.get_scores(tokenize(q))[i]), "terms": terms[:top_terms]}
