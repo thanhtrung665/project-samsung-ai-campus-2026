@@ -6,7 +6,7 @@
 | **`NB1_data_pipeline.ipynb`** | CPU (~1 phút, đã chạy sẵn kết quả) | Nạp dữ liệu → kho tri thức SQLite + RAG → chất lượng dữ liệu (thiếu giá, giá trộn VAT) → nhãn intent & đặc trưng → chia train/val/test theo nhóm + kiểm rò rỉ → EDA có nhận xét kinh doanh → chuẩn hóa thành dữ liệu v2 (công cụ SQL, RAFT, hội thoại nhiều lượt, từ chối) → kiểm tra sẵn sàng → manifest md5 | `data/`, `images/eda_*`, `results/*_stats.json`, `data/MANIFEST.json` |
 | **`NB2_finetune_rag_mvp.ipynb`** | Kaggle GPU T4 | Nhận dữ liệu (kiểm manifest) → thiết lập (Optuna tùy chọn, baseline) → fine-tune **LoRA 16-bit**, **QLoRA 4-bit** (+ 8-bit tùy chọn) × {Qwen2.5-3B, LLaMA-3.2-3B} → đánh giá trên test → trực quan & phân tích (CI 95%, VRAM ↔ chất lượng, intent, câu nhiễu, ca lỗi) → demo nhanh → **Hybrid-RAG** (BM25 + dense + RRF + reranker + lọc) & ablation → đánh giá hệ thống (gốc / +RAG / fine-tune / +RAG / +Agent), định tuyến công cụ, kịch bản đặt bàn, judge → **xuất mô hình gộp** + gói MVP → demo MVP | `results/*` (báo cáo tự đọc), `/kaggle/working/kimochi-mvp-model`, `kimochi-mvp-bundle.zip` |
 
-Thứ tự: **NB1 → tải repo lên Kaggle (Dataset) → NB2**. NB2 dừng nếu dữ liệu lệch manifest của NB1.
+Thứ tự: **NB1 → tải repo lên Kaggle (Dataset) → NB2** — hướng dẫn từng bước: [`KAGGLE_GUIDE.md`](KAGGLE_GUIDE.md). NB2 dừng nếu dữ liệu lệch manifest của NB1.
 NB2 có thể chạy nhiều phiên: thêm output phiên trước làm input, các bước đã xong tự bỏ qua.
 
 ## Notebook chi tiết theo từng bước (tham khảo / chạy riêng lẻ)
